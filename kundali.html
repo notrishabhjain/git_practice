@@ -1,0 +1,2406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jain Kundali</title>
+  <script src="./assets/jain-core.js"></script>
+  <style>
+    :root {
+      --bg: #f6efe3;
+      --paper: rgba(255, 251, 244, 0.95);
+      --paper-strong: #fffaf2;
+      --ink: #2f2419;
+      --muted: #6e5b46;
+      --line: #dccab2;
+      --accent: #b65a1f;
+      --accent-deep: #7a3813;
+      --leaf: #476c49;
+      --warn: #9a412a;
+      --blue: #355d90;
+      --shadow: 0 18px 46px rgba(72, 46, 19, 0.1);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", serif;
+      background:
+        radial-gradient(circle at top left, rgba(255, 183, 94, 0.25), transparent 30%),
+        radial-gradient(circle at right 12%, rgba(140, 103, 67, 0.13), transparent 24%),
+        linear-gradient(180deg, #f4e9d8, var(--bg));
+      min-height: 100vh;
+    }
+
+    .shell {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    .hero,
+    .panel {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 28px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      right: -80px;
+      bottom: -100px;
+      background: radial-gradient(circle, rgba(182, 90, 31, 0.18), transparent 70%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 0.75rem;
+      color: var(--accent-deep);
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-weight: 700;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5.8vw, 4.4rem);
+      line-height: 0.92;
+      margin-top: 10px;
+      max-width: 820px;
+    }
+
+    .hero-text {
+      max-width: 860px;
+      margin-top: 12px;
+      color: var(--muted);
+      line-height: 1.72;
+    }
+
+    .hero-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .lang-toggle {
+      display: inline-flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .lang-toggle button,
+    .nav button,
+    .secondary-btn,
+    .primary-btn {
+      border-radius: 999px;
+      border: 1px solid transparent;
+      font: inherit;
+      cursor: pointer;
+      transition: 180ms ease;
+    }
+
+    .lang-toggle button,
+    .nav button {
+      background: #fff;
+      color: var(--muted);
+      border-color: var(--line);
+      padding: 9px 14px;
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
+
+    .lang-toggle button.active,
+    .nav button.active {
+      background: var(--accent-deep);
+      border-color: var(--accent-deep);
+      color: #fff;
+    }
+
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 350px minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 18px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .panel {
+      padding: 18px;
+    }
+
+    .panel h2 {
+      font-size: 1.18rem;
+      margin-bottom: 12px;
+    }
+
+    .stack {
+      display: grid;
+      gap: 12px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+    }
+
+    .helper {
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+
+    .primary-btn,
+    .secondary-btn {
+      width: 100%;
+      padding: 13px 16px;
+      font-weight: 700;
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, var(--accent), #d07835);
+      color: #fff;
+      box-shadow: 0 12px 28px rgba(182, 90, 31, 0.28);
+    }
+
+    .secondary-btn {
+      background: rgba(182, 90, 31, 0.08);
+      border-color: rgba(182, 90, 31, 0.16);
+      color: var(--accent-deep);
+    }
+
+    .button-row {
+      display: grid;
+      gap: 10px;
+    }
+
+    .content {
+      display: grid;
+      gap: 16px;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: grid;
+      gap: 16px;
+    }
+
+    .section-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .wide {
+      grid-column: 1 / -1;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .stat {
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: var(--paper-strong);
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(53, 93, 144, 0.08);
+      color: var(--blue);
+      font-size: 0.84rem;
+    }
+
+    .callout {
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      padding: 14px 16px;
+      line-height: 1.68;
+      background: rgba(71, 108, 73, 0.08);
+    }
+
+    .callout.warn {
+      background: rgba(154, 65, 42, 0.08);
+      color: #6f2c1b;
+    }
+
+    .callout.soft {
+      background: rgba(53, 93, 144, 0.06);
+      color: #26476d;
+    }
+
+    .muted {
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.94rem;
+    }
+
+    th, td {
+      padding: 11px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--accent-deep);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .area-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .area-card,
+    .house-card,
+    .planet-card,
+    .ritual-card {
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: var(--paper-strong);
+      padding: 16px;
+    }
+
+    .area-head,
+    .planet-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .score {
+      min-width: 78px;
+      text-align: center;
+      border-radius: 18px;
+      padding: 8px 10px;
+      background: rgba(182, 90, 31, 0.08);
+      color: var(--accent-deep);
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .progress-wrap {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .progress-line {
+      display: grid;
+      gap: 5px;
+    }
+
+    .progress-track {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(182, 90, 31, 0.12);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), #e1954b);
+    }
+
+    .subtle-list,
+    .remedy-list {
+      margin: 10px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.66;
+    }
+
+    .house-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .house-meta,
+    .planet-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: rgba(71, 108, 73, 0.09);
+      color: var(--leaf);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .chip.warn {
+      background: rgba(154, 65, 42, 0.08);
+      color: var(--warn);
+    }
+
+    .chip.blue {
+      background: rgba(53, 93, 144, 0.09);
+      color: var(--blue);
+    }
+
+    .planet-grid,
+    .ritual-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .planet-symbol {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.86rem;
+    }
+
+    .cosmo {
+      width: 100%;
+      min-height: 390px;
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      background:
+        radial-gradient(circle at center, rgba(255, 213, 134, 0.22), transparent 26%),
+        linear-gradient(180deg, #fbf5ea, #f6eee1);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 34px 10px;
+      border-radius: 18px;
+      border: 1px dashed var(--line);
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    @media (max-width: 1120px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+    }
+
+    @media (max-width: 960px) {
+      .section-grid,
+      .area-grid,
+      .planet-grid,
+      .ritual-grid,
+      .house-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .row { grid-template-columns: 1fr; }
+      .hero-row { flex-direction: column; }
+      .shell { padding: 12px; }
+      .hero, .panel { border-radius: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <div class="hero-row">
+        <div>
+          <div class="eyebrow" id="heroEyebrow"></div>
+          <h1 id="heroTitle"></h1>
+          <p class="hero-text" id="heroText"></p>
+        </div>
+        <div class="lang-toggle">
+          <button id="langEn" class="active" type="button">English</button>
+          <button id="langHi" type="button">हिंदी</button>
+        </div>
+      </div>
+      <div class="nav" id="nav"></div>
+    </section>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <section class="panel">
+          <h2 id="inputTitle"></h2>
+          <div class="stack">
+            <div>
+              <label for="name" id="labelName"></label>
+              <input id="name" type="text" value="Rishabh Jain">
+            </div>
+            <div class="row">
+              <div>
+                <label for="date" id="labelDate"></label>
+                <input id="date" type="date" value="1992-08-15">
+              </div>
+              <div>
+                <label for="time" id="labelTime"></label>
+                <input id="time" type="time" value="09:15">
+              </div>
+            </div>
+            <div>
+              <label for="city" id="labelCity"></label>
+              <input id="city" type="text" list="cityList" value="Jaipur">
+              <datalist id="cityList"></datalist>
+            </div>
+            <div class="helper" id="cityHelper"></div>
+            <button class="primary-btn" id="generateBtn" type="button"></button>
+            <div class="button-row">
+              <button class="secondary-btn" id="pdfEnBtn" type="button"></button>
+              <button class="secondary-btn" id="pdfHiBtn" type="button"></button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2 id="guardTitle"></h2>
+          <ul class="subtle-list" id="guardList"></ul>
+        </section>
+      </aside>
+
+      <main class="content">
+        <section class="panel" id="summaryPanel">
+          <div class="empty" id="emptyState"></div>
+        </section>
+
+        <section class="section active" id="life"></section>
+        <section class="section" id="houses"></section>
+        <section class="section" id="planets"></section>
+        <section class="section" id="timing"></section>
+        <section class="section" id="rituals"></section>
+        <section class="section" id="muhurta"></section>
+        <section class="section" id="cosmology"></section>
+        <section class="section" id="notes"></section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const LANG = {
+      en: {
+        heroEyebrow: "Single User Kundali App",
+        heroTitle: "Jain kundali focused on real life areas, present karmic intensity, future timing, and remedies.",
+        heroText: "This singular app merges the user-facing and deeper remedial flows into one Jain-only experience. It takes a city name, resolves location internally, and centers the reading on work, money, relationships, health, protection, spirituality, and the specific remedies or ritual supports linked to those areas.",
+        inputTitle: "Birth details",
+        labelName: "Name",
+        labelDate: "Date of birth",
+        labelTime: "Time of birth",
+        labelCity: "Birth city",
+        cityHelper: "Use a city name only. The app resolves latitude and longitude internally from the bundled city list.",
+        generate: "Generate Jain Kundali",
+        exportPdfEn: "Export English PDF",
+        exportPdfHi: "Export Hindi PDF",
+        guardTitle: "Jain guardrails",
+        empty: "Generate the kundali to see life-area predictions and remedies.",
+        nav: {
+          life: "Life Areas",
+          houses: "House Focus",
+          planets: "Planet Focus",
+          timing: "Dasha & Time",
+          rituals: "Rituals",
+          muhurta: "Muhurta",
+          cosmology: "Cosmology",
+          notes: "Notes"
+        },
+        summaryGenerated: "Generated",
+        summaryCurrent: "Current focus",
+        summaryFuture: "Future shift",
+        summaryCity: "Resolved city",
+        summaryTopAreas: "Top life areas now",
+        currentMaha: "Current Mahadasha",
+        currentAntar: "Current Antardasha",
+        nextMaha: "Next Mahadasha",
+        lagna: "Lagna",
+        tithi: "Tithi",
+        nakshatra: "Nakshatra",
+        yoga: "Yoga",
+        karana: "Karana",
+        intensity: "Intensity",
+        strength: "Strength",
+        focusNow: "Present focus",
+        focusFuture: "Future focus",
+        remedyFocus: "Remedy focus",
+        predictedNow: "Prediction now",
+        predictedFuture: "Future direction",
+        specificRemedy: "Specific Jain remedy",
+        practicalSupport: "Practical support",
+        sourceLayer: "Ritual layer",
+        houseStrength: "House strength",
+        occupants: "Occupants",
+        presentScore: "Present score",
+        futureScore: "Future score",
+        linkedArea: "Linked life area",
+        planetStrength: "Planet strength",
+        activation: "Activation",
+        focusArea: "Focus area",
+        remedy: "Remedy",
+        mantra: "Mantra",
+        jaap: "Jaap count",
+        state: "State",
+        aspects: "Aspects",
+        timeline: "Timeline",
+        currentPeriod: "Current period",
+        birthBalance: "Birth dasha balance",
+        hora: "Hora",
+        auspicious: "Auspicious?",
+        businessCheck: "Business start",
+        marriageFlags: "Marriage warnings",
+        forbiddenTags: "Forbidden tags",
+        notesTitle: "Source boundaries and design choices",
+        cosmologyTitle: "Two suns and two moons",
+        cosmologyText: "The extract describes visible and antipodal luminaries revolving around Meru 180 degrees apart. This panel keeps that idea visible as a teaching layer while the practical Panchang still uses the visible pair for Bharata Kshetra.",
+        ritualTitle: "Yantra, devi, devta, and non-conventional puja layer",
+        timingTitle: "Dasha, Panchang, and time logic",
+        lifeTitle: "Life-area prediction focus",
+        housesTitle: "House indicators for present and future",
+        planetsTitle: "Planet strength and activation",
+        muhurtaTitle: "Muhurta check",
+        ritualWhen: "When to use",
+        ritualSource: "Source",
+        ritualProcess: "Suggested process",
+        ritualLogic: "Why this area is linked",
+        ritualCaution: "Caution",
+        beneficHora: "Benefic hora",
+        avoidHora: "Avoid for auspicious starts",
+        noMarriageFlags: "No extracted marriage warning is triggered by the implemented rule set.",
+        noteRitual: "These ritual references come from the supplied Jain-oriented prototype material and are kept as a separate layer from the stricter core extract.",
+        noteCityFallback: "If your exact city is unavailable, choose the nearest major city from the list.",
+        unresolvedCity: "City not found in the bundled list. Please choose a listed or nearby major city.",
+        statusHigh: "Strong opening",
+        statusMid: "Steady but effort-based",
+        statusLow: "Sensitive karmic area",
+        statusVeryLow: "Obstacle-clearing phase",
+        activationNow: "Active now",
+        activationFuture: "Rising ahead",
+        activationStable: "Steady influence",
+        activationQuiet: "Background influence",
+        ritualSafety: "Use these as Jain-aligned spiritual supports, not as substitutes for medical, legal, or financial judgment.",
+        validationTitle: "Data validation",
+        validationPass: "All major sections have chart data and rendered output.",
+        validationFail: "Some sections failed validation. Fallback content is shown instead of leaving them blank.",
+        renderError: "This section hit a rendering error, so fallback content is being shown.",
+        renderNoMarkup: "No markup was produced.",
+        unknownRenderError: "Unknown rendering error.",
+        fallbackWord: "Fallback",
+        exportNeedsChart: "Generate the kundali before exporting PDF.",
+        exportPreparing: "Preparing PDF view. Your browser print dialog will open so you can save it as PDF.",
+        start: "Start",
+        end: "End",
+        pass: "Pass",
+        check: "Check",
+        none: "None",
+        unnamed: "Unnamed",
+        yearsWord: "years",
+        padaWord: "Pada",
+        validationChecks: "Section validation",
+        houseWord: "House",
+        orbitNotes: "Orbit notes",
+        keyConstants: "Key calendar constants",
+        nakRegistry: "28-Nakshatra registry",
+        visibleSun: "Visible Sun",
+        visibleMoon: "Visible Moon",
+        antipodalSun: "Antipodal Sun",
+        antipodalMoon: "Antipodal Moon",
+        meru: "Meru",
+        yugaWord: "Yuga",
+        solarYearsWord: "solar years",
+        lunarMonthsWord: "Lunar months",
+        adhikMaasWord: "Adhik Maas",
+        ruleWord: "Rule",
+        orderWord: "Order",
+        nameWord: "Name",
+        tierWord: "Tier",
+        noteWord: "Note",
+        kharmasWarning: "Kharmas warning: Sun in Sagittarius or Pisces.",
+        forbiddenTithiClass: "Forbidden tithi class present",
+        sunAngle: "Sun",
+        moonAngle: "Moon",
+        antipodalAngle: "Antipodal 180°"
+      },
+      hi: {
+        heroEyebrow: "एकल उपयोगकर्ता कुण्डली ऐप",
+        heroTitle: "जैन कुण्डली जिसमें जीवन क्षेत्रों, वर्तमान कर्म तीव्रता, भविष्य दिशा और उपायों पर मुख्य ध्यान है।",
+        heroText: "यह एक ही ऐप उपयोगकर्ता कुण्डली, जीवन क्षेत्र भविष्यफल, वर्तमान और भविष्य के फोकस, तथा जैन उपायों को एक जगह लाता है। इसमें केवल शहर का नाम लिया जाता है और स्थान निर्देशांक भीतर से निकाले जाते हैं।",
+        inputTitle: "जन्म विवरण",
+        labelName: "नाम",
+        labelDate: "जन्म तिथि",
+        labelTime: "जन्म समय",
+        labelCity: "जन्म शहर",
+        cityHelper: "केवल शहर का नाम दें। ऐप अंदर ही अंदर निर्देशांक निकाल लेता है।",
+        generate: "जैन कुण्डली बनाइए",
+        exportPdfEn: "English PDF निर्यात",
+        exportPdfHi: "हिंदी PDF निर्यात",
+        guardTitle: "जैन मर्यादा",
+        empty: "कुण्डली बनाकर जीवन क्षेत्र और उपाय देखें।",
+        nav: {
+          life: "जीवन क्षेत्र",
+          houses: "भाव फोकस",
+          planets: "ग्रह फोकस",
+          timing: "दशा और समय",
+          rituals: "अनुष्ठान",
+          muhurta: "मुहूर्त",
+          cosmology: "जैन ब्रह्माण्ड",
+          notes: "टिप्पणियाँ"
+        },
+        summaryGenerated: "निर्मित",
+        summaryCurrent: "वर्तमान फोकस",
+        summaryFuture: "भविष्य परिवर्तन",
+        summaryCity: "निर्धारित शहर",
+        summaryTopAreas: "अभी के प्रमुख जीवन क्षेत्र",
+        currentMaha: "वर्तमान महादशा",
+        currentAntar: "वर्तमान अंतरदशा",
+        nextMaha: "अगली महादशा",
+        lagna: "लग्न",
+        tithi: "तिथि",
+        nakshatra: "नक्षत्र",
+        yoga: "योग",
+        karana: "करण",
+        intensity: "तीव्रता",
+        strength: "बल",
+        focusNow: "वर्तमान फोकस",
+        focusFuture: "भविष्य फोकस",
+        remedyFocus: "उपाय केंद्र",
+        predictedNow: "अभी का संकेत",
+        predictedFuture: "भविष्य दिशा",
+        specificRemedy: "विशिष्ट जैन उपाय",
+        practicalSupport: "व्यावहारिक सहारा",
+        sourceLayer: "अनुष्ठान परत",
+        houseStrength: "भाव बल",
+        occupants: "स्थित ग्रह",
+        presentScore: "वर्तमान स्कोर",
+        futureScore: "भविष्य स्कोर",
+        linkedArea: "जुड़ा जीवन क्षेत्र",
+        planetStrength: "ग्रह बल",
+        activation: "सक्रियता",
+        focusArea: "फोकस क्षेत्र",
+        remedy: "उपाय",
+        mantra: "मंत्र",
+        jaap: "जाप संख्या",
+        state: "स्थिति",
+        aspects: "दृष्टि",
+        timeline: "समयरेखा",
+        currentPeriod: "वर्तमान अवधि",
+        birthBalance: "जन्म दशा शेष",
+        hora: "होरा",
+        auspicious: "शुभ?",
+        businessCheck: "व्यवसाय आरम्भ",
+        marriageFlags: "विवाह चेतावनी",
+        forbiddenTags: "निषिद्ध संकेत",
+        notesTitle: "स्रोत सीमाएँ और चयन",
+        cosmologyTitle: "दो सूर्य और दो चन्द्र",
+        cosmologyText: "उद्धृत सामग्री में मेरु के चारों ओर दृश्य और विपरीत दिशा वाले सूर्य-चन्द्र १८० डिग्री पर बताए गए हैं। यह पैनल उसी जैन कल्पना को दिखाता है।",
+        ritualTitle: "यंत्र, देवी, देवता और विशेष पूजन",
+        timingTitle: "दशा, पंचांग और समय तर्क",
+        lifeTitle: "जीवन क्षेत्र आधारित भविष्यफल",
+        housesTitle: "वर्तमान और भविष्य के भाव संकेतक",
+        planetsTitle: "ग्रह बल और सक्रियता",
+        muhurtaTitle: "मुहूर्त जाँच",
+        ritualWhen: "कब करें",
+        ritualSource: "स्रोत",
+        ritualProcess: "विधि",
+        ritualLogic: "यह क्यों जुड़ा है",
+        ritualCaution: "सावधानी",
+        beneficHora: "शुभ होरा",
+        avoidHora: "शुभ कार्य से बचें",
+        noMarriageFlags: "अभी लागू नियमों में कोई विवाह चेतावनी सक्रिय नहीं है।",
+        noteRitual: "यह अनुष्ठान परत दिए गए जैन-उन्मुख प्रोटोटाइप सामग्री से ली गई है और मूल गणितीय परत से अलग रखी गई है।",
+        noteCityFallback: "यदि आपका सटीक शहर सूची में न हो तो निकटतम बड़ा शहर चुनें।",
+        unresolvedCity: "यह शहर सूची में नहीं मिला। कृपया सूची में दिया हुआ या निकट का बड़ा शहर चुनें।",
+        statusHigh: "मजबूत अवसर",
+        statusMid: "संतुलित परिश्रम",
+        statusLow: "संवेदनशील कर्म क्षेत्र",
+        statusVeryLow: "अवरोध शोधन काल",
+        activationNow: "अभी सक्रिय",
+        activationFuture: "आगे उभरता हुआ",
+        activationStable: "स्थिर प्रभाव",
+        activationQuiet: "पृष्ठभूमि प्रभाव",
+        ritualSafety: "इन उपायों को जैन आध्यात्मिक सहारा मानें, चिकित्सा, कानूनी या आर्थिक निर्णय का विकल्प नहीं।",
+        validationTitle: "डेटा जाँच",
+        validationPass: "सभी मुख्य अनुभागों में कुण्डली डेटा और रेंडर आउटपुट उपलब्ध है।",
+        validationFail: "कुछ अनुभागों में समस्या मिली। खाली छोड़ने के बजाय वैकल्पिक सामग्री दिखाई जा रही है।",
+        renderError: "इस अनुभाग में रेंडर समस्या आई, इसलिए वैकल्पिक सामग्री दिखाई जा रही है।",
+        renderNoMarkup: "इस अनुभाग के लिए कोई सामग्री तैयार नहीं हो सकी।",
+        unknownRenderError: "अज्ञात रेंडर समस्या।",
+        fallbackWord: "वैकल्पिक",
+        exportNeedsChart: "PDF निर्यात से पहले कुण्डली बनाइए।",
+        exportPreparing: "PDF दृश्य तैयार हो रहा है। ब्राउज़र प्रिंट डायलॉग खुलेगा, जहाँ से PDF सुरक्षित कर सकते हैं।",
+        start: "आरम्भ",
+        end: "समाप्ति",
+        pass: "सही",
+        check: "जाँचें",
+        none: "कोई नहीं",
+        unnamed: "नाम नहीं दिया गया",
+        yearsWord: "वर्ष",
+        padaWord: "पाद",
+        validationChecks: "अनुभाग जाँच",
+        houseWord: "भाव",
+        orbitNotes: "कक्षा टिप्पणियाँ",
+        keyConstants: "मुख्य काल गणना",
+        nakRegistry: "28-नक्षत्र सूची",
+        visibleSun: "दृश्य सूर्य",
+        visibleMoon: "दृश्य चन्द्र",
+        antipodalSun: "विपरीत सूर्य",
+        antipodalMoon: "विपरीत चन्द्र",
+        meru: "मेरु",
+        yugaWord: "युग",
+        solarYearsWord: "सौर वर्ष",
+        lunarMonthsWord: "चन्द्र मास",
+        adhikMaasWord: "अधिक मास",
+        ruleWord: "नियम",
+        orderWord: "क्रम",
+        nameWord: "नाम",
+        tierWord: "श्रेणी",
+        noteWord: "टिप्पणी",
+        kharmasWarning: "खरमास चेतावनी: सूर्य धनु या मीन राशि में है।",
+        forbiddenTithiClass: "निषिद्ध तिथि वर्ग सक्रिय है",
+        sunAngle: "सूर्य",
+        moonAngle: "चन्द्र",
+        antipodalAngle: "विपरीत 180°"
+      }
+    };
+
+    const CITY_DB = [
+      { key: "jaipur", en: "Jaipur, Rajasthan", hi: "जयपुर, राजस्थान", lat: 26.9124, lon: 75.7873 },
+      { key: "mumbai", en: "Mumbai, Maharashtra", hi: "मुंबई, महाराष्ट्र", lat: 19.076, lon: 72.8777 },
+      { key: "delhi", en: "Delhi", hi: "दिल्ली", lat: 28.6139, lon: 77.209 },
+      { key: "newdelhi", en: "New Delhi", hi: "नई दिल्ली", lat: 28.6139, lon: 77.209 },
+      { key: "ahmedabad", en: "Ahmedabad, Gujarat", hi: "अहमदाबाद, गुजरात", lat: 23.0225, lon: 72.5714 },
+      { key: "surat", en: "Surat, Gujarat", hi: "सूरत, गुजरात", lat: 21.1702, lon: 72.8311 },
+      { key: "vadodara", en: "Vadodara, Gujarat", hi: "वडोदरा, गुजरात", lat: 22.3072, lon: 73.1812 },
+      { key: "rajkot", en: "Rajkot, Gujarat", hi: "राजकोट, गुजरात", lat: 22.3039, lon: 70.8022 },
+      { key: "palitana", en: "Palitana, Gujarat", hi: "पलिताना, गुजरात", lat: 21.5252, lon: 71.8274 },
+      { key: "udaipur", en: "Udaipur, Rajasthan", hi: "उदयपुर, राजस्थान", lat: 24.5854, lon: 73.7125 },
+      { key: "jodhpur", en: "Jodhpur, Rajasthan", hi: "जोधपुर, राजस्थान", lat: 26.2389, lon: 73.0243 },
+      { key: "indore", en: "Indore, Madhya Pradesh", hi: "इंदौर, मध्य प्रदेश", lat: 22.7196, lon: 75.8577 },
+      { key: "bhopal", en: "Bhopal, Madhya Pradesh", hi: "भोपाल, मध्य प्रदेश", lat: 23.2599, lon: 77.4126 },
+      { key: "jabalpur", en: "Jabalpur, Madhya Pradesh", hi: "जबलपुर, मध्य प्रदेश", lat: 23.1815, lon: 79.9864 },
+      { key: "kundalpur", en: "Damoh / Kundalpur, Madhya Pradesh", hi: "दमोह / कुण्डलपुर, मध्य प्रदेश", lat: 23.8381, lon: 79.4422 },
+      { key: "bangalore", en: "Bengaluru, Karnataka", hi: "बेंगलुरु, कर्नाटक", lat: 12.9716, lon: 77.5946 },
+      { key: "bengaluru", en: "Bengaluru, Karnataka", hi: "बेंगलुरु, कर्नाटक", lat: 12.9716, lon: 77.5946 },
+      { key: "mysuru", en: "Mysuru, Karnataka", hi: "मैसूरु, कर्नाटक", lat: 12.2958, lon: 76.6394 },
+      { key: "shravanabelagola", en: "Shravanabelagola, Karnataka", hi: "श्रवणबेलगोला, कर्नाटक", lat: 12.8574, lon: 76.4889 },
+      { key: "hubballi", en: "Hubballi, Karnataka", hi: "हुब्बल्ली, कर्नाटक", lat: 15.3647, lon: 75.124 },
+      { key: "chennai", en: "Chennai, Tamil Nadu", hi: "चेन्नई, तमिलनाडु", lat: 13.0827, lon: 80.2707 },
+      { key: "hyderabad", en: "Hyderabad, Telangana", hi: "हैदराबाद, तेलंगाना", lat: 17.385, lon: 78.4867 },
+      { key: "kolkata", en: "Kolkata, West Bengal", hi: "कोलकाता, पश्चिम बंगाल", lat: 22.5726, lon: 88.3639 },
+      { key: "pune", en: "Pune, Maharashtra", hi: "पुणे, महाराष्ट्र", lat: 18.5204, lon: 73.8567 },
+      { key: "nashik", en: "Nashik, Maharashtra", hi: "नाशिक, महाराष्ट्र", lat: 19.9975, lon: 73.7898 },
+      { key: "nagpur", en: "Nagpur, Maharashtra", hi: "नागपुर, महाराष्ट्र", lat: 21.1458, lon: 79.0882 },
+      { key: "lucknow", en: "Lucknow, Uttar Pradesh", hi: "लखनऊ, उत्तर प्रदेश", lat: 26.8467, lon: 80.9462 },
+      { key: "patna", en: "Patna, Bihar", hi: "पटना, बिहार", lat: 25.5941, lon: 85.1376 },
+      { key: "meerut", en: "Meerut, Uttar Pradesh", hi: "मेरठ, उत्तर प्रदेश", lat: 28.9845, lon: 77.7064 },
+      { key: "giridih", en: "Giridih / Shikharji, Jharkhand", hi: "गिरिडीह / शिखरजी, झारखंड", lat: 24.1821, lon: 86.2863 },
+      { key: "chandigarh", en: "Chandigarh", hi: "चंडीगढ़", lat: 30.7333, lon: 76.7794 },
+      { key: "kochi", en: "Kochi, Kerala", hi: "कोच्चि, केरल", lat: 9.9312, lon: 76.2673 }
+    ];
+
+    const GUARDRAILS = {
+      en: JAIN.data.JAIN_PRINCIPLE_GUIDANCE,
+      hi: [
+        "ग्रहों को कर्म उदय के संकेतक मानें, स्वतंत्र देव शक्तियाँ नहीं।",
+        "अहिंसा-समर्थ उपायों को प्राथमिकता दें: मंत्र, स्वाध्याय, उपवास, संयम, दान, सेवा और करुणा।",
+        "जीव दान, अस्त्र दान या हाथीदाँत जैसे उपायों को जैन उपयोगकर्ता उत्पाद में लागू न करें।",
+        "स्रोत-आधारित उपाय और जैन सिद्धान्त से निकाली गई आधुनिक व्याख्या को अलग रखें।"
+      ]
+    };
+
+    const SOURCE_NOTES = {
+      en: JAIN.data.SOURCE_BOUNDARIES,
+      hi: [
+        "उद्धृत सामग्री में जैन काल-इकाइयाँ, युग माप, तिथि-योग-करण सूत्र, मुहूर्त निषेध, और अभिजित सहित 28-नक्षत्र सूची उपलब्ध है।",
+        "उद्धृत सामग्री में सभी 28 नक्षत्रों के पूर्ण संख्यात्मक देशांतर विस्तार नहीं दिए गए। इसलिए चल गणना में 27-आधारित ढाँचा रखा गया है और 28-नक्षत्र सूची अलग दिखाई गई है।",
+        "उद्धृत सामग्री स्वयं ग्रह-तीर्थंकर मानचित्रण को प्रमाणित नहीं करती। इसलिए मुख्य स्रोत-आधारित उपाय इंजन में ऐसे मानचित्रण को शामिल नहीं किया गया।"
+      ]
+    };
+
+    const AREA_LIBRARY = {
+      career: {
+        houses: [10, 6, 11, 2],
+        planets: ["Sun", "Saturn", "Mercury", "Jupiter"],
+        en: {
+          title: "Career, duty, and public standing",
+          presentGood: "Professional visibility can rise when discipline and right conduct stay strong.",
+          presentLow: "Work pressure, slow approvals, or responsibility overload may feel heavy right now.",
+          futureGood: "The next phase can reward preparation, patient execution, and a cleaner reputation path.",
+          futureLow: "The coming period asks for steadier routines before external recognition grows.",
+          remedyFocus: "Use this when career, authority, or livelihood becomes the main karmic pressure point."
+        },
+        hi: {
+          title: "करियर, कर्तव्य और प्रतिष्ठा",
+          presentGood: "अनुशासन और सही आचरण बने रहें तो कार्यक्षेत्र में पहचान बढ़ सकती है।",
+          presentLow: "अभी काम का दबाव, धीमी प्रगति या जिम्मेदारियों का बोझ अधिक लग सकता है।",
+          futureGood: "अगला चरण तैयारी, धैर्य और साफ प्रतिष्ठा का फल दे सकता है।",
+          futureLow: "आने वाला समय पहले दिनचर्या को स्थिर करने की मांग करेगा।",
+          remedyFocus: "जब आजीविका, पद या जिम्मेदारी मुख्य कर्म क्षेत्र बन जाए तो यह उपाय लें।"
+        },
+        ritual: {
+          en: {
+            title: "Chakreshwari support for career movement",
+            deity: "Mata Chakreshwari",
+            yantra: "Vyapar Vriddhi Siddhachakra Yantra",
+            source: "Jwalamalini Kalpa and Siddhachakra Vidhan",
+            mantra: "Om Hrim Shrim Klim Aim Arham Namah",
+            when: "Wednesday or Thursday morning for 21 days",
+            process: [
+              "Wear clean yellow clothing and sit facing north.",
+              "Place or draw the yantra on Bhojpatra using a clean ritual medium.",
+              "Light a pure lamp and recite 108 repetitions daily.",
+              "Pair the ritual with honest work discipline and restrained speech."
+            ],
+            logic: "This layer is used when livelihood, effort, and blocked progress are the dominant karmic concern."
+          },
+          hi: {
+            title: "करियर गति हेतु चक्रेश्वरी सहारा",
+            deity: "माता चक्रेश्वरी",
+            yantra: "व्यापार वृद्धि सिद्धचक्र यंत्र",
+            source: "ज्वालामालिनी कल्प और सिद्धचक्र विधान",
+            mantra: "ॐ ह्रीं श्रीं क्लीं ऐं अर्हं नमः",
+            when: "बुधवार या गुरुवार प्रातः, 21 दिन",
+            process: [
+              "स्वच्छ पीले वस्त्र पहनकर उत्तर की ओर बैठें।",
+              "यंत्र को स्थापित करें या भोजपत्र पर अंकित करें।",
+              "शुद्ध दीपक जलाकर प्रतिदिन 108 जाप करें।",
+              "इस साधना को सत्यनिष्ठ कर्म और संयमित वाणी से जोड़ें।"
+            ],
+            logic: "जब आजीविका, परिश्रम और रुका हुआ कार्य मुख्य कर्म विषय हो तब यह परत उपयोगी मानी जाती है।"
+          }
+        }
+      },
+      wealth: {
+        houses: [2, 11, 5, 9],
+        planets: ["Jupiter", "Venus", "Mercury", "Moon"],
+        en: {
+          title: "Wealth, gains, and material flow",
+          presentGood: "Income channels and support from networks can improve through measured decisions.",
+          presentLow: "Leakage, delay, or attachment-driven expense may disturb financial stability.",
+          futureGood: "The next phase can strengthen gain, savings discipline, and better use of resources.",
+          futureLow: "Future money flow improves only when greed and scattered expense are reduced first.",
+          remedyFocus: "Use this when savings, gains, and stable prosperity become the central concern."
+        },
+        hi: {
+          title: "धन, लाभ और संसाधन प्रवाह",
+          presentGood: "संतुलित निर्णयों से आय और सहयोग के रास्ते सुधर सकते हैं।",
+          presentLow: "खर्च का रिसाव, देरी या आसक्ति से आर्थिक अस्थिरता बढ़ सकती है।",
+          futureGood: "अगला चरण लाभ, बचत अनुशासन और संसाधनों के बेहतर उपयोग को मजबूत कर सकता है।",
+          futureLow: "भविष्य का धन प्रवाह पहले लोभ और बिखरे खर्च को घटाने पर निर्भर करेगा।",
+          remedyFocus: "जब बचत, लाभ और स्थिर समृद्धि मुख्य चिंता बन जाए तो यह उपाय लें।"
+        },
+        ritual: {
+          en: {
+            title: "Padmavati support for abundance",
+            deity: "Mata Padmavati",
+            yantra: "Padmavati Mahayantra",
+            source: "Bhairav Padmavati Kalpa",
+            mantra: "Om Hrim Shri Padmavati Devyai Namah",
+            when: "Friday at sunset for 48 days",
+            process: [
+              "Sit facing east at sunset in clean red or white clothing.",
+              "Place the yantra on a clean cloth and light a lamp.",
+              "Recite the mantra in three malas where feasible.",
+              "Combine the practice with charity and reduced possessiveness."
+            ],
+            logic: "This layer is used when gain exists but attachment, expense, or unstable accumulation clouds the result."
+          },
+          hi: {
+            title: "समृद्धि हेतु पद्मावती सहारा",
+            deity: "माता पद्मावती",
+            yantra: "पद्मावती महायंत्र",
+            source: "भैरव पद्मावती कल्प",
+            mantra: "ॐ ह्रीं श्री पद्मावती देव्यै नमः",
+            when: "शुक्रवार सूर्यास्त के समय, 48 दिन",
+            process: [
+              "स्वच्छ वस्त्र पहनकर सूर्यास्त में पूर्व की ओर बैठें।",
+              "यंत्र को साफ आसन पर स्थापित कर दीपक जलाएँ।",
+              "संभव हो तो तीन माला मंत्र जाप करें।",
+              "इस साधना को दान और अपरिग्रह से जोड़ें।"
+            ],
+            logic: "जब लाभ तो हो पर आसक्ति, अधिक खर्च या अस्थिर संचय बाधा बन जाए तब यह परत उपयोगी मानी जाती है।"
+          }
+        }
+      },
+      relationships: {
+        houses: [7, 4, 2, 5],
+        planets: ["Venus", "Moon", "Jupiter", "Mercury"],
+        en: {
+          title: "Relationships, family, and emotional harmony",
+          presentGood: "Supportive dialogue, healing, and family steadiness can grow through patience.",
+          presentLow: "Misunderstanding, emotional distance, or domestic friction may need soft handling.",
+          futureGood: "The next phase can help rebuild trust, alliance, and warmth at home.",
+          futureLow: "The future asks for forgiveness and calmer speech before harmony returns fully.",
+          remedyFocus: "Use this when marriage, family peace, or emotional balance becomes the main concern."
+        },
+        hi: {
+          title: "रिश्ते, परिवार और भावनात्मक संतुलन",
+          presentGood: "धैर्य के साथ संवाद, मेल-मिलाप और घर की स्थिरता बढ़ सकती है।",
+          presentLow: "गलतफहमी, दूरी या घरेलू तनाव को बहुत कोमलता से संभालने की जरूरत है।",
+          futureGood: "अगला चरण भरोसा, साथ और घर की गर्माहट फिर से बढ़ा सकता है।",
+          futureLow: "भविष्य में पहले क्षमा और शांत वाणी की आवश्यकता रहेगी।",
+          remedyFocus: "जब विवाह, पारिवारिक शांति या मन का संतुलन मुख्य विषय बन जाए तो यह उपाय लें।"
+        },
+        ritual: {
+          en: {
+            title: "Ambika support for household harmony",
+            deity: "Mata Ambika",
+            yantra: "Ambika Raksha Yantra",
+            source: "Ambika Kalpa",
+            mantra: "Om Hrim Shri Ambika Devyai Namah",
+            when: "Monday morning for 27 days",
+            process: [
+              "Sit in a quiet place facing east.",
+              "Place the yantra on a white cloth and light a ghee lamp.",
+              "Offer white sandal or flowers where appropriate.",
+              "Before the mantra, consciously forgive the person linked to the tension."
+            ],
+            logic: "This layer is used when anger, pride, or household friction becomes the visible karmic knot."
+          },
+          hi: {
+            title: "गृह शांति हेतु अंबिका सहारा",
+            deity: "माता अंबिका",
+            yantra: "अंबिका रक्षा यंत्र",
+            source: "अंबिका कल्प",
+            mantra: "ॐ ह्रीं श्री अंबिका देव्यै नमः",
+            when: "सोमवार प्रातः, 27 दिन",
+            process: [
+              "शांत स्थान में पूर्व की ओर बैठें।",
+              "यंत्र को सफेद वस्त्र पर स्थापित कर घी का दीपक जलाएँ।",
+              "उचित हो तो चंदन या श्वेत पुष्प अर्पित करें।",
+              "जाप से पहले मन में क्षमा का भाव लें।"
+            ],
+            logic: "जब क्रोध, मान या पारिवारिक घर्षण मुख्य कर्म गाँठ बन जाए तब यह परत उपयोगी मानी जाती है।"
+          }
+        }
+      },
+      protection: {
+        houses: [6, 8, 12, 7],
+        planets: ["Saturn", "Rahu", "Mars", "Ketu"],
+        en: {
+          title: "Protection, hidden pressure, and legal stress",
+          presentGood: "If handled carefully, adversity can be contained and converted into stronger boundaries.",
+          presentLow: "Hidden opposition, fear, legal entanglement, or sudden pressure may be active now.",
+          futureGood: "The next phase can stabilize vulnerable edges if caution and restraint stay strong.",
+          futureLow: "The future requires stronger protection of energy, speech, and risk-taking patterns.",
+          remedyFocus: "Use this when enemies, legal issues, fear, or unseen pressure become the major theme."
+        },
+        hi: {
+          title: "रक्षा, छिपा दबाव और कानूनी तनाव",
+          presentGood: "सावधानी से कठिनाई को सीमित कर सुरक्षा और धैर्य में बदला जा सकता है।",
+          presentLow: "गुप्त विरोध, भय, कानूनी उलझन या अचानक दबाव अभी सक्रिय हो सकता है।",
+          futureGood: "अगला चरण यदि संयम रहे तो कमजोर बिंदुओं को स्थिर कर सकता है।",
+          futureLow: "भविष्य में ऊर्जा, वाणी और जोखिम लेने की आदत पर अधिक रक्षा चाहिए।",
+          remedyFocus: "जब शत्रु, कानूनी तनाव, भय या अदृश्य दबाव मुख्य विषय बन जाए तो यह उपाय लें।"
+        },
+        ritual: {
+          en: {
+            title: "Kshatrapal and protective yantra layer",
+            deity: "Kshatrapal with Parshvanath support",
+            yantra: "Raksha Kavach Yantra",
+            source: "Bhairav Kalpa style protective layer from supplied prototype",
+            mantra: "Om Hrim Kshatrapalaya Namah",
+            when: "Saturday evening or during heavy Rahu/Saturn periods",
+            process: [
+              "Sit after sunset in a protected and calm place.",
+              "Place the yantra on a dark clean cloth and light a lamp.",
+              "Use black sesame or cloves symbolically if desired.",
+              "End the practice with Navkar and a restraint vow against anger."
+            ],
+            logic: "This layer is used when Saturn-Rahu style pressure, fear, or hidden conflict dominates the reading."
+          },
+          hi: {
+            title: "क्षेत्रपाल और रक्षा यंत्र परत",
+            deity: "क्षेत्रपाल, पार्श्वनाथ सहारा सहित",
+            yantra: "रक्षा कवच यंत्र",
+            source: "दिए गए प्रोटोटाइप की रक्षात्मक जैन परत",
+            mantra: "ॐ ह्रीं क्षेत्रपालाय नमः",
+            when: "शनिवार सायं या भारी राहु-शनि चरण में",
+            process: [
+              "सूर्यास्त के बाद शांत और सुरक्षित स्थान पर बैठें।",
+              "यंत्र को गहरे स्वच्छ वस्त्र पर रखकर दीपक जलाएँ।",
+              "इच्छा हो तो काले तिल या लौंग का प्रतीकात्मक उपयोग करें।",
+              "अंत में नवकार और क्रोध-त्याग का संकल्प लें।"
+            ],
+            logic: "जब शनि-राहु जैसा दबाव, भय या छिपा संघर्ष प्रमुख हो जाए तब यह परत उपयोगी मानी जाती है।"
+          }
+        }
+      },
+      health: {
+        houses: [1, 6, 8, 12],
+        planets: ["Moon", "Mars", "Saturn", "Sun"],
+        en: {
+          title: "Health, vitality, and recovery",
+          presentGood: "Recovery improves when discipline, food restraint, and rest are honored.",
+          presentLow: "Fatigue, stress, inflammation, or recurring health drain may need immediate care.",
+          futureGood: "The next phase can support rebuilding strength through rhythm and disciplined correction.",
+          futureLow: "Health becomes a priority area ahead, so neglect will be costly.",
+          remedyFocus: "Use this when body, illness, or energy depletion becomes the most active karmic area."
+        },
+        hi: {
+          title: "स्वास्थ्य, जीवनबल और पुनर्प्राप्ति",
+          presentGood: "संयम, भोजन अनुशासन और विश्राम से सुधार तेजी से हो सकता है।",
+          presentLow: "थकान, तनाव, सूजन या बार-बार की कमजोरी पर अभी ध्यान जरूरी है।",
+          futureGood: "अगला चरण दिनचर्या और अनुशासन से बल पुनः बनाने में सहायक हो सकता है।",
+          futureLow: "आगे स्वास्थ्य प्राथमिक क्षेत्र बन सकता है, इसलिए उपेक्षा महँगी पड़ेगी।",
+          remedyFocus: "जब शरीर, रोग या ऊर्जा क्षय सबसे सक्रिय कर्म क्षेत्र बन जाए तो यह उपाय लें।"
+        },
+        ritual: {
+          en: {
+            title: "Ghantakarna support for health strain",
+            deity: "Ghantakarna Mahavir and Vasupujya support",
+            yantra: "Ghantakarna Mahavir Yantra",
+            source: "Ghantakarna Kalpa and Vishapahar layer from supplied prototype",
+            mantra: "Om Hrim Shrim Klim Aim Ghantakarna Mahavir",
+            when: "Tuesday or during strong health stress",
+            process: [
+              "Keep clean water nearby for symbolic jal-abhimantran.",
+              "Light a lamp and recite the mantra with focused calm.",
+              "Use one-meal restraint or light fasting only if health permits.",
+              "Pair the ritual with medicine support or care donation to others."
+            ],
+            logic: "This layer is used when disease, weakness, or bodily agitation is the clearest active karmic area."
+          },
+          hi: {
+            title: "स्वास्थ्य तनाव हेतु घंटाकर्ण सहारा",
+            deity: "घंटाकर्ण महावीर और वासुपूज्य सहारा",
+            yantra: "घंटाकर्ण महावीर यंत्र",
+            source: "दिए गए प्रोटोटाइप की घंटाकर्ण और विषापहार परत",
+            mantra: "ॐ ह्रीं श्रीं क्लीं ऐं घंटाकर्ण महावीर",
+            when: "मंगलवार या स्वास्थ्य संकट में",
+            process: [
+              "प्रतीकात्मक जल-अभिमंत्रण हेतु स्वच्छ जल पास रखें।",
+              "दीपक जलाकर शांत मन से मंत्र जाप करें।",
+              "स्वास्थ्य अनुमति दे तो हल्का उपवास या एकाशन रखें।",
+              "इस साधना को औषधि दान या सेवा से जोड़ें।"
+            ],
+            logic: "जब रोग, कमजोरी या शारीरिक अशांति सबसे स्पष्ट कर्म क्षेत्र हो तब यह परत उपयोगी मानी जाती है।"
+          }
+        }
+      },
+      spirituality: {
+        houses: [9, 12, 5, 8],
+        planets: ["Jupiter", "Ketu", "Moon", "Saturn"],
+        en: {
+          title: "Spirituality, detachment, and inner direction",
+          presentGood: "Study, restraint, and inward practice can yield unusually deep clarity now.",
+          presentLow: "Meaning may feel distant until silence and inner order are restored.",
+          futureGood: "The next period can deepen vairagya, scriptural interest, and disciplined inward practice.",
+          futureLow: "Future growth comes only by reducing distraction and emotional overreaction first.",
+          remedyFocus: "Use this when moksha-oriented practice, retreat, or inner re-centering becomes urgent."
+        },
+        hi: {
+          title: "आध्यात्मिकता, वैराग्य और आंतरिक दिशा",
+          presentGood: "अभी अध्ययन, संयम और अंतरमुख साधना से गहरी स्पष्टता मिल सकती है।",
+          presentLow: "अर्थबोध दूर लग सकता है जब तक मौन और भीतरी व्यवस्था वापस न आए।",
+          futureGood: "अगला चरण वैराग्य, शास्त्र-अध्ययन और अनुशासित साधना को गहरा कर सकता है।",
+          futureLow: "भविष्य की वृद्धि पहले व्यर्थ विचलन और भावात्मक प्रतिक्रिया घटाने से आएगी।",
+          remedyFocus: "जब मोक्षमार्ग, एकांत साधना या भीतर लौटना मुख्य आवश्यकता बन जाए तो यह उपाय लें।"
+        },
+        ritual: {
+          en: {
+            title: "Rishi Mandal Ajapa Jaap",
+            deity: "Arhant-centered internal meditation support",
+            yantra: "Rishi Mandal Yantra",
+            source: "Rishi Mandal Stotra layer from supplied prototype",
+            mantra: "Om Hrim Namo Arhantanam",
+            when: "Daily, best in Brahma Muhurta or quiet dawn practice",
+            process: [
+              "Sit in Samayika-like stillness and reduced speech.",
+              "Meditate on the yantra center or an internal bindu.",
+              "Synchronize the mantra softly with the breath.",
+              "Keep equanimity as the real core of the practice."
+            ],
+            logic: "This layer is used when the chart shows stronger pull toward detachment, study, or karmic burning through inward practice."
+          },
+          hi: {
+            title: "ऋषि मंडल अजपा जाप",
+            deity: "अरिहंत केंद्रित आंतरिक ध्यान सहारा",
+            yantra: "ऋषि मंडल यंत्र",
+            source: "दिए गए प्रोटोटाइप की ऋषि मंडल परत",
+            mantra: "ॐ ह्रीं नमो अरिहंताणं",
+            when: "प्रतिदिन, विशेषतः ब्रह्म मुहूर्त या शांत प्रातःकाल",
+            process: [
+              "सामायिक जैसे स्थिर भाव में बैठें।",
+              "यंत्र के केंद्र या भीतरी बिंदु पर ध्यान रखें।",
+              "मंत्र को श्वास के साथ कोमलता से जोड़ें।",
+              "समता को ही साधना का वास्तविक केंद्र बनाएँ।"
+            ],
+            logic: "जब चार्ट में वैराग्य, अध्ययन या भीतर की साधना का खिंचाव अधिक हो जाए तब यह परत उपयोगी होती है।"
+          }
+        }
+      }
+    };
+
+    const DEEP_RITUALS = {
+      en: [
+        {
+          title: "Kalashtami protective discipline",
+          purpose: "For heavy Saturn-Rahu style fear, hidden pressure, or legal tension.",
+          when: "Krishna Paksha Ashtami night",
+          steps: [
+            "Sit after sunset in a calm place.",
+            "Use symbolic dark cloth, lamp, and black sesame if desired.",
+            "Recite protective mantra and end with Navkar."
+          ]
+        },
+        {
+          title: "Bhoomi-shayan and jal-abhimantran",
+          purpose: "For strong anger, heat, agitation, or health stress where restraint is needed.",
+          when: "Tuesday or during Mars-linked strain",
+          steps: [
+            "Keep clean water nearby, chant with focus, and rest the body.",
+            "If health allows, keep one-meal restraint.",
+            "Pair with service and medicine support."
+          ]
+        },
+        {
+          title: "Ajapa inward practice",
+          purpose: "For deep inner re-centering, karmic quieting, and spiritual steadiness.",
+          when: "Daily in a quiet morning window",
+          steps: [
+            "Sit in stillness and soften speech.",
+            "Link the mantra with breath and equanimity.",
+            "Use scriptural study as support, not distraction."
+          ]
+        }
+      ],
+      hi: [
+        {
+          title: "कालाष्टमी रक्षात्मक अनुशासन",
+          purpose: "भारी शनि-राहु दबाव, भय या कानूनी तनाव में।",
+          when: "कृष्ण पक्ष अष्टमी रात्रि",
+          steps: [
+            "सूर्यास्त के बाद शांत स्थान पर बैठें।",
+            "इच्छा हो तो गहरे वस्त्र, दीपक और काले तिल का प्रतीकात्मक उपयोग करें।",
+            "रक्षात्मक मंत्र के बाद नवकार से समाप्त करें।"
+          ]
+        },
+        {
+          title: "भूमि-शयन और जल-अभिमंत्रण",
+          purpose: "तीव्र क्रोध, गर्म प्रकृति, अशांति या स्वास्थ्य तनाव में संयम हेतु।",
+          when: "मंगलवार या मंगल-सम्बन्धी तनाव में",
+          steps: [
+            "स्वच्छ जल पास रखें और एकाग्रता से मंत्र जाप करें।",
+            "स्वास्थ्य अनुमति दे तो एकाशन रखें।",
+            "सेवा या औषधि दान से इसे जोड़ें।"
+          ]
+        },
+        {
+          title: "अजपा आंतरिक साधना",
+          purpose: "भीतर लौटने, कर्म-शमन और आध्यात्मिक स्थिरता के लिए।",
+          when: "प्रतिदिन शांत प्रातःकाल",
+          steps: [
+            "स्थिर बैठें और वाणी को कम करें।",
+            "मंत्र को श्वास के साथ जोड़ें।",
+            "समता को साधना का केंद्र रखें।"
+          ]
+        }
+      ]
+    };
+
+    const sections = [
+      { id: "life", key: "life" },
+      { id: "houses", key: "houses" },
+      { id: "planets", key: "planets" },
+      { id: "timing", key: "timing" },
+      { id: "rituals", key: "rituals" },
+      { id: "muhurta", key: "muhurta" },
+      { id: "cosmology", key: "cosmology" },
+      { id: "notes", key: "notes" }
+    ];
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const requestedLang = urlParams.get("lang");
+    const requestedSection = urlParams.get("section");
+
+    let activeLang = requestedLang === "hi" ? "hi" : "en";
+    let activeSection = sections.some((section) => section.id === requestedSection) ? requestedSection : "life";
+    let currentChart = null;
+
+    function t(path) {
+      const parts = path.split(".");
+      let node = LANG[activeLang];
+      for (const part of parts) {
+        node = node?.[part];
+      }
+      return node ?? path;
+    }
+
+    function qs(id) {
+      return document.getElementById(id);
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function normalizeText(text) {
+      return String(text || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9\u0900-\u097f]/g, "");
+    }
+
+    function resolveCity(input) {
+      const needle = normalizeText(input);
+      if (!needle) return null;
+      const exact = CITY_DB.find((city) => {
+        return [city.key, city.en, city.hi].some((value) => normalizeText(value) === needle);
+      });
+      if (exact) return exact;
+      return CITY_DB.find((city) => {
+        return [city.key, city.en, city.hi].some((value) => normalizeText(value).includes(needle) || needle.includes(normalizeText(value)));
+      }) || null;
+    }
+
+    function populateCities() {
+      qs("cityList").innerHTML = CITY_DB.map((city) => `<option value="${city.en.split(",")[0]}"></option>`).join("");
+    }
+
+    const PLANET_NAMES = {
+      Sun: { en: "Sun", hi: "सूर्य" },
+      Moon: { en: "Moon", hi: "चन्द्र" },
+      Mars: { en: "Mars", hi: "मंगल" },
+      Mercury: { en: "Mercury", hi: "बुध" },
+      Jupiter: { en: "Jupiter", hi: "गुरु" },
+      Venus: { en: "Venus", hi: "शुक्र" },
+      Saturn: { en: "Saturn", hi: "शनि" },
+      Rahu: { en: "Rahu", hi: "राहु" },
+      Ketu: { en: "Ketu", hi: "केतु" }
+    };
+
+    const RASHI_NAMES = {
+      Mesh: { en: "Mesh", hi: "मेष" },
+      Vrish: { en: "Vrish", hi: "वृषभ" },
+      Mithun: { en: "Mithun", hi: "मिथुन" },
+      Kark: { en: "Kark", hi: "कर्क" },
+      Singh: { en: "Singh", hi: "सिंह" },
+      Kanya: { en: "Kanya", hi: "कन्या" },
+      Tula: { en: "Tula", hi: "तुला" },
+      Vrishchik: { en: "Vrishchik", hi: "वृश्चिक" },
+      Dhanu: { en: "Dhanu", hi: "धनु" },
+      Makar: { en: "Makar", hi: "मकर" },
+      Kumbh: { en: "Kumbh", hi: "कुंभ" },
+      Meen: { en: "Meen", hi: "मीन" }
+    };
+
+    const STATE_LABELS = {
+      Exalted: { en: "Exalted", hi: "उच्च" },
+      "Own Sign": { en: "Own Sign", hi: "स्वराशि" },
+      Debilitated: { en: "Debilitated", hi: "नीच" },
+      Neutral: { en: "Neutral", hi: "सामान्य" }
+    };
+
+    const WEEKDAY_LABELS = {
+      Sunday: { en: "Sunday", hi: "रविवार" },
+      Monday: { en: "Monday", hi: "सोमवार" },
+      Tuesday: { en: "Tuesday", hi: "मंगलवार" },
+      Wednesday: { en: "Wednesday", hi: "बुधवार" },
+      Thursday: { en: "Thursday", hi: "गुरुवार" },
+      Friday: { en: "Friday", hi: "शुक्रवार" },
+      Saturday: { en: "Saturday", hi: "शनिवार" }
+    };
+
+    const HOUSE_SIGNIFICATIONS_HI = [
+      "स्व और शरीर",
+      "धन और वाणी",
+      "साहस और सहोदर",
+      "गृह और माता",
+      "संतान और बुद्धि",
+      "रोग, ऋण और बाधा",
+      "विवाह और साझेदारी",
+      "आयु और परिवर्तन",
+      "धर्म और भाग्य",
+      "कर्म और प्रतिष्ठा",
+      "लाभ और नेटवर्क",
+      "व्यय और निवृत्ति"
+    ];
+
+    const PAKSHA_LABELS = {
+      Shukla: { en: "Shukla", hi: "शुक्ल" },
+      Krishna: { en: "Krishna", hi: "कृष्ण" }
+    };
+
+    const TITHI_LABELS = {
+      Pratipada: { en: "Pratipada", hi: "प्रतिपदा" },
+      Dvitiya: { en: "Dvitiya", hi: "द्वितीया" },
+      Tritiya: { en: "Tritiya", hi: "तृतीया" },
+      Chaturthi: { en: "Chaturthi", hi: "चतुर्थी" },
+      Panchami: { en: "Panchami", hi: "पंचमी" },
+      Shashthi: { en: "Shashthi", hi: "षष्ठी" },
+      Saptami: { en: "Saptami", hi: "सप्तमी" },
+      Ashtami: { en: "Ashtami", hi: "अष्टमी" },
+      Navami: { en: "Navami", hi: "नवमी" },
+      Dashami: { en: "Dashami", hi: "दशमी" },
+      Ekadashi: { en: "Ekadashi", hi: "एकादशी" },
+      Dvadashi: { en: "Dvadashi", hi: "द्वादशी" },
+      Trayodashi: { en: "Trayodashi", hi: "त्रयोदशी" },
+      Chaturdashi: { en: "Chaturdashi", hi: "चतुर्दशी" },
+      "Purnima / Amavasya": { en: "Purnima / Amavasya", hi: "पूर्णिमा / अमावस्या" }
+    };
+
+    const KARANA_LABELS = {
+      Bava: { en: "Bava", hi: "बव" },
+      Balava: { en: "Balava", hi: "बालव" },
+      Kaulava: { en: "Kaulava", hi: "कौलव" },
+      Taitila: { en: "Taitila", hi: "तैतिल" },
+      Gara: { en: "Gara", hi: "गर" },
+      Vanija: { en: "Vanija", hi: "वणिज" },
+      Vishti: { en: "Vishti", hi: "विष्टि" },
+      Shakuni: { en: "Shakuni", hi: "शकुनि" },
+      Chatushpada: { en: "Chatushpada", hi: "चतुष्पद" },
+      Naga: { en: "Naga", hi: "नाग" },
+      Kimstughna: { en: "Kimstughna", hi: "किंस्तुघ्न" }
+    };
+
+    const NAKSHATRA_LABELS = {
+      Ashwini: { en: "Ashwini", hi: "अश्विनी" },
+      Bharani: { en: "Bharani", hi: "भरणी" },
+      Krittika: { en: "Krittika", hi: "कृत्तिका" },
+      Rohini: { en: "Rohini", hi: "रोहिणी" },
+      Mrigashira: { en: "Mrigashira", hi: "मृगशिरा" },
+      Ardra: { en: "Ardra", hi: "आर्द्रा" },
+      Punarvasu: { en: "Punarvasu", hi: "पुनर्वसु" },
+      Pushya: { en: "Pushya", hi: "पुष्य" },
+      Ashlesha: { en: "Ashlesha", hi: "आश्लेषा" },
+      Magha: { en: "Magha", hi: "मघा" },
+      "Purva Phalguni": { en: "Purva Phalguni", hi: "पूर्व फाल्गुनी" },
+      "Uttara Phalguni": { en: "Uttara Phalguni", hi: "उत्तर फाल्गुनी" },
+      Hasta: { en: "Hasta", hi: "हस्त" },
+      Chitra: { en: "Chitra", hi: "चित्रा" },
+      Swati: { en: "Swati", hi: "स्वाती" },
+      Vishakha: { en: "Vishakha", hi: "विशाखा" },
+      Anuradha: { en: "Anuradha", hi: "अनुराधा" },
+      Jyeshtha: { en: "Jyeshtha", hi: "ज्येष्ठा" },
+      Moola: { en: "Moola", hi: "मूल" },
+      "Purva Ashadha": { en: "Purva Ashadha", hi: "पूर्वाषाढ़ा" },
+      "Uttara Ashadha": { en: "Uttara Ashadha", hi: "उत्तराषाढ़ा" },
+      Abhijit: { en: "Abhijit", hi: "अभिजित" },
+      Shravana: { en: "Shravana", hi: "श्रवण" },
+      Dhanishta: { en: "Dhanishta", hi: "धनिष्ठा" },
+      Shatabhisha: { en: "Shatabhisha", hi: "शतभिषा" },
+      "Purva Bhadrapada": { en: "Purva Bhadrapada", hi: "पूर्व भाद्रपदा" },
+      "Uttara Bhadrapada": { en: "Uttara Bhadrapada", hi: "उत्तर भाद्रपदा" },
+      Revati: { en: "Revati", hi: "रेवती" }
+    };
+
+    const FORBIDDEN_TAGS = {
+      dagdha: { en: "Dagdha", hi: "दग्ध" },
+      visha: { en: "Visha", hi: "विष" },
+      hutashan: { en: "Hutashan", hi: "हुताशन" }
+    };
+
+    const TIER_LABELS = {
+      Kula: { en: "Kula", hi: "कुल" },
+      Upakula: { en: "Upakula", hi: "उपकुल" },
+      Kulopakula: { en: "Kulopakula", hi: "कुलोपकुल" }
+    };
+
+    const COSMOLOGY_NOTES = {
+      en: [
+        { label: "Sun inner orbit", value: "44,820 yojanas from Meru" },
+        { label: "Sun orbit field", value: "184 mandalas across 510 48/61 yojanas" },
+        { label: "Moon orbit field", value: "15 mandalas in the extracted cosmology notes" },
+        { label: "Practical rule", value: "Visible pair is used for Bharata Kshetra Panchang and tithi logic" }
+      ],
+      hi: [
+        { label: "सूर्य की भीतरी कक्षा", value: "मेरु से 44,820 योजन" },
+        { label: "सूर्य कक्षा क्षेत्र", value: "510 48/61 योजन विस्तार में 184 मंडल" },
+        { label: "चन्द्र कक्षा क्षेत्र", value: "उद्धृत ब्रह्माण्डीय टिप्पणियों में 15 मंडल" },
+        { label: "व्यावहारिक नियम", value: "भरत क्षेत्र के पंचांग और तिथि हेतु दृश्य युग्म का उपयोग" }
+      ]
+    };
+
+    const YUGA_RULES = {
+      en: JAIN.data.YUGA_DATA.adhikRule,
+      hi: "यदि दो लगातार अमावस्याओं के बीच कोई संक्रांति न हो तो अधिक मास माना जाता है।"
+    };
+
+    const NAKSHATRA_NOTES_HI = {
+      "Source notes state Abhijit takes the closing segment of Uttara Ashadha.": "स्रोत टिप्पणियों के अनुसार अभिजित उत्तराषाढ़ा के अंतिम खंड को ग्रहण करता है।",
+      "Exact extracted span: 19 Ghatis or 9 27/67 Muhurtas.": "उद्धृत सटीक विस्तार: 19 घटी या 9 27/67 मुहूर्त।",
+      "Source notes state Abhijit takes the opening segment of Shravana.": "स्रोत टिप्पणियों के अनुसार अभिजित श्रवण के आरम्भिक खंड को ग्रहण करता है।"
+    };
+
+    function localizePlanet(name) {
+      return PLANET_NAMES[name]?.[activeLang] || name;
+    }
+
+    function localizeRashi(name) {
+      return RASHI_NAMES[name]?.[activeLang] || name;
+    }
+
+    function localizeState(name) {
+      return STATE_LABELS[name]?.[activeLang] || name;
+    }
+
+    function localizeWeekday(name) {
+      return WEEKDAY_LABELS[name]?.[activeLang] || name;
+    }
+
+    function localizeHouseSign(index) {
+      return activeLang === "hi" ? HOUSE_SIGNIFICATIONS_HI[index] : JAIN.data.HOUSE_SIGNIFICATIONS[index];
+    }
+
+    function localizePaksha(name) {
+      return PAKSHA_LABELS[name]?.[activeLang] || name;
+    }
+
+    function localizeTithi(tithi) {
+      const tithiName = TITHI_LABELS[tithi.name]?.[activeLang] || tithi.name;
+      return activeLang === "hi" ? `${localizePaksha(tithi.paksha)} ${tithiName}` : tithi.label;
+    }
+
+    function localizeKarana(name) {
+      return KARANA_LABELS[name]?.[activeLang] || name;
+    }
+
+    function localizeNakshatra(name) {
+      return NAKSHATRA_LABELS[name]?.[activeLang] || name;
+    }
+
+    function localizeYoga(name) {
+      if (activeLang === "hi" && /^Yoga \d+$/.test(name)) {
+        return name.replace("Yoga", "योग");
+      }
+      return name;
+    }
+
+    function localizeForbiddenTag(name) {
+      return FORBIDDEN_TAGS[name]?.[activeLang] || name;
+    }
+
+    function localizeTier(name) {
+      return TIER_LABELS[name]?.[activeLang] || name;
+    }
+
+    function localizeNakshatraNote(note) {
+      if (activeLang === "hi") {
+        return NAKSHATRA_NOTES_HI[note] || note;
+      }
+      return note;
+    }
+
+    function formatDateLocalized(date) {
+      return new Intl.DateTimeFormat(activeLang === "hi" ? "hi-IN" : "en-IN", {
+        year: "numeric",
+        month: "short",
+        day: "2-digit"
+      }).format(date);
+    }
+
+    function formatDateTimeLocalized(date) {
+      return `${formatDateLocalized(date)} ${date.toLocaleTimeString(activeLang === "hi" ? "hi-IN" : "en-IN", { hour: "2-digit", minute: "2-digit" })}`;
+    }
+
+    function formatTimeLocalized(date) {
+      return date.toLocaleTimeString(activeLang === "hi" ? "hi-IN" : "en-IN", { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function stateStrength(state) {
+      if (state === "Exalted") return 95;
+      if (state === "Own Sign") return 82;
+      if (state === "Debilitated") return 30;
+      return 62;
+    }
+
+    function scoreLabel(score) {
+      if (score >= 78) return t("statusHigh");
+      if (score >= 58) return t("statusMid");
+      if (score >= 40) return t("statusLow");
+      return t("statusVeryLow");
+    }
+
+    function activationLabel(nowScore, futureScore) {
+      if (nowScore >= 78) return t("activationNow");
+      if (futureScore >= 72) return t("activationFuture");
+      if (nowScore >= 52 || futureScore >= 52) return t("activationStable");
+      return t("activationQuiet");
+    }
+
+    function getNextMaha(chart) {
+      const index = chart.dasha.dashas.findIndex((item) => item.lord === chart.dasha.current.lord && item.start.getTime() === chart.dasha.current.start.getTime());
+      return chart.dasha.dashas[index + 1] || null;
+    }
+
+    function getHouseData(chart) {
+      const nextMaha = getNextMaha(chart);
+      const currentMahaPlanet = chart.planets.find((planet) => planet.key === chart.dasha.current.lord);
+      const currentAntarPlanet = chart.planets.find((planet) => planet.key === chart.dasha.currentAntar.lord);
+      const nextMahaPlanet = nextMaha ? chart.planets.find((planet) => planet.key === nextMaha.lord) : null;
+
+      return Array.from({ length: 12 }, (_, index) => {
+        const house = index + 1;
+        const rashiIndex = (chart.lagnaIndex + index) % 12;
+        const occupants = chart.planets.filter((planet) => planet.house === house);
+        const aspectors = chart.planets.filter((planet) => planet.aspects.includes(house));
+        const occupantStrength = occupants.length
+          ? occupants.reduce((sum, planet) => sum + stateStrength(planet.state), 0) / occupants.length
+          : 38;
+        const aspectBonus = Math.min(20, aspectors.length * 4);
+        const currentBonus =
+          (currentMahaPlanet?.house === house ? 30 : 0) +
+          (currentAntarPlanet?.house === house ? 18 : 0) +
+          (currentMahaPlanet?.aspects.includes(house) ? 9 : 0) +
+          (currentAntarPlanet?.aspects.includes(house) ? 6 : 0);
+        const futureBonus =
+          (nextMahaPlanet?.house === house ? 28 : 0) +
+          (nextMahaPlanet?.aspects.includes(house) ? 8 : 0);
+        const present = Math.min(100, Math.round(occupantStrength * 0.62 + aspectBonus + currentBonus));
+        const future = Math.min(100, Math.round(occupantStrength * 0.55 + aspectBonus + futureBonus));
+
+        return {
+          house,
+          rashiIndex,
+          rashiName: JAIN.data.RASHI_SHORT[rashiIndex],
+          occupants,
+          occupantStrength: Math.round(occupantStrength),
+          present,
+          future,
+          aspects: aspectors
+        };
+      });
+    }
+
+    function getAreaKeyForHouse(house) {
+      if ([10, 6, 11, 2].includes(house)) return "career";
+      if ([2, 11, 5, 9].includes(house)) return "wealth";
+      if ([7, 4, 5].includes(house)) return "relationships";
+      if ([1, 6, 8].includes(house)) return "health";
+      if ([12, 9].includes(house)) return "spirituality";
+      return "protection";
+    }
+
+    function getPracticalSupport(areaKey, chart) {
+      const area = AREA_LIBRARY[areaKey];
+      const relevantPlanets = chart.planets.filter((planet) => area.planets.includes(planet.key));
+      const remedy = relevantPlanets.sort((a, b) => stateStrength(a.state) - stateStrength(b.state))[0]?.remedy;
+      if (!remedy) return [];
+      return remedy.jainAdaptation.slice(0, 2);
+    }
+
+    function buildLifeAreas(chart, houses) {
+      const nextMaha = getNextMaha(chart);
+      return Object.entries(AREA_LIBRARY).map(([key, area]) => {
+        const relatedHouses = houses.filter((house) => area.houses.includes(house.house));
+        const present = Math.round(relatedHouses.reduce((sum, house) => sum + house.present, 0) / relatedHouses.length);
+        const future = Math.round(relatedHouses.reduce((sum, house) => sum + house.future, 0) / relatedHouses.length);
+        const topNow = relatedHouses.slice().sort((a, b) => b.present - a.present)[0];
+        const topFuture = relatedHouses.slice().sort((a, b) => b.future - a.future)[0];
+        const data = area[activeLang];
+        const presentText = present >= 58 ? data.presentGood : data.presentLow;
+        const futureText = future >= 58 ? data.futureGood : data.futureLow;
+        return {
+          key,
+          title: data.title,
+          present,
+          future,
+          presentText,
+          futureText,
+          topNow,
+          topFuture,
+          remedyFocus: data.remedyFocus,
+          ritual: area.ritual[activeLang],
+          practical: getPracticalSupport(key, chart),
+          currentReference: `${localizePlanet(chart.dasha.current.lord)} → ${t("houseWord")} ${topNow.house}`,
+          futureReference: nextMaha ? `${localizePlanet(nextMaha.lord)} → ${t("houseWord")} ${topFuture.house}` : "-"
+        };
+      }).sort((a, b) => b.present - a.present);
+    }
+
+    function buildChartViewModel(chart) {
+      const houses = getHouseData(chart);
+      const lifeAreas = buildLifeAreas(chart, houses);
+      const nextMaha = getNextMaha(chart);
+
+      const planets = chart.planets.map((planet) => {
+        const strength = stateStrength(planet.state);
+        const nowScore = Math.min(100,
+          Math.round(strength * 0.6 +
+          (planet.key === chart.dasha.current.lord ? 28 : 0) +
+          (planet.key === chart.dasha.currentAntar.lord ? 18 : 0)));
+        const futureScore = Math.min(100,
+          Math.round(strength * 0.56 +
+          (planet.key === nextMaha?.lord ? 28 : 0)));
+        const focusAreaKey = getAreaKeyForHouse(planet.house);
+        return {
+          ...planet,
+          strength,
+          nowScore,
+          futureScore,
+          focusAreaKey,
+          focusAreaTitle: AREA_LIBRARY[focusAreaKey][activeLang].title
+        };
+      }).sort((a, b) => b.nowScore - a.nowScore);
+
+      return { houses, lifeAreas, planets, nextMaha };
+    }
+
+    function sectionRenderedCleanly(id) {
+      const el = qs(id);
+      return !!el && el.dataset.renderState === "ok" && !!el.textContent.trim();
+    }
+
+    function validateChartData(chart, vm) {
+      const checks = [
+        { key: "life", valid: Array.isArray(vm.lifeAreas) && vm.lifeAreas.length > 0 && sectionRenderedCleanly("life") },
+        { key: "houses", valid: Array.isArray(vm.houses) && vm.houses.length === 12 && sectionRenderedCleanly("houses") },
+        { key: "planets", valid: Array.isArray(vm.planets) && vm.planets.length === 9 && sectionRenderedCleanly("planets") },
+        { key: "timing", valid: !!chart.dasha?.current && !!chart.panchang?.tithi && sectionRenderedCleanly("timing") },
+        { key: "rituals", valid: Array.isArray(vm.lifeAreas) && vm.lifeAreas.every((area) => !!area.ritual) && sectionRenderedCleanly("rituals") },
+        { key: "muhurta", valid: !!chart.input?.latitude && !!chart.input?.longitude && sectionRenderedCleanly("muhurta") },
+        { key: "cosmology", valid: !!chart.cosmology?.visibleSun && !!chart.cosmology?.visibleMoon && sectionRenderedCleanly("cosmology") },
+        { key: "notes", valid: Array.isArray(chart.notes) && chart.notes.length > 0 && sectionRenderedCleanly("notes") }
+      ];
+      return {
+        checks,
+        ok: checks.every((item) => item.valid)
+      };
+    }
+
+    function fallbackSectionMarkup(id, errorText) {
+      return `
+        <section class="panel">
+          <h2>${escapeHtml(t(`nav.${id === "life" ? "life" : id}`) || id)}</h2>
+          <div class="callout warn">
+            <strong>${escapeHtml(t("renderError"))}</strong><br>
+            ${escapeHtml(errorText)}
+          </div>
+        </section>
+      `;
+    }
+
+    function safeRenderSection(id, renderer) {
+      try {
+        renderer();
+        if (!qs(id).innerHTML.trim()) {
+          qs(id).dataset.renderState = "fallback";
+          qs(id).innerHTML = fallbackSectionMarkup(id, t("renderNoMarkup"));
+        } else {
+          qs(id).dataset.renderState = "ok";
+        }
+      } catch (error) {
+        qs(id).dataset.renderState = "fallback";
+        qs(id).innerHTML = fallbackSectionMarkup(id, error?.message || t("unknownRenderError"));
+      }
+    }
+
+    function updateStaticText() {
+      qs("heroEyebrow").textContent = t("heroEyebrow");
+      qs("heroTitle").textContent = t("heroTitle");
+      qs("heroText").textContent = t("heroText");
+      qs("inputTitle").textContent = t("inputTitle");
+      qs("labelName").textContent = t("labelName");
+      qs("labelDate").textContent = t("labelDate");
+      qs("labelTime").textContent = t("labelTime");
+      qs("labelCity").textContent = t("labelCity");
+      qs("cityHelper").textContent = `${t("cityHelper")} ${t("noteCityFallback")}`;
+      qs("generateBtn").textContent = t("generate");
+      qs("pdfEnBtn").textContent = t("exportPdfEn");
+      qs("pdfHiBtn").textContent = t("exportPdfHi");
+      qs("guardTitle").textContent = t("guardTitle");
+      qs("emptyState").textContent = t("empty");
+      qs("langEn").classList.toggle("active", activeLang === "en");
+      qs("langHi").classList.toggle("active", activeLang === "hi");
+      qs("guardList").innerHTML = GUARDRAILS[activeLang].map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+    }
+
+    function renderNav() {
+      qs("nav").innerHTML = sections.map((section) => `
+        <button class="${section.id === activeSection ? "active" : ""}" data-section="${section.id}" type="button">
+          ${t(`nav.${section.key}`)}
+        </button>
+      `).join("");
+      qs("nav").querySelectorAll("button").forEach((button) => {
+        button.addEventListener("click", () => showSection(button.dataset.section));
+      });
+    }
+
+    function showSection(id) {
+      activeSection = id;
+      sections.forEach((section) => {
+        qs(section.id).classList.toggle("active", section.id === id);
+      });
+      renderNav();
+    }
+
+    function getInput() {
+      const city = resolveCity(qs("city").value.trim());
+      if (!city) return null;
+      return {
+        name: qs("name").value.trim(),
+        date: qs("date").value,
+        time: qs("time").value,
+        place: city.en,
+        city,
+        latitude: city.lat,
+        longitude: city.lon
+      };
+    }
+
+    function renderSummary(chart, vm) {
+      const topThree = vm.lifeAreas.slice(0, 3);
+      const validation = validateChartData(chart, vm);
+      const failedSections = validation.checks.filter((item) => !item.valid).map((item) => t(`nav.${item.key}`));
+      qs("summaryPanel").innerHTML = `
+        <div class="eyebrow">${t("summaryGenerated")} · ${formatDateTimeLocalized(chart.generatedAt)}</div>
+        <h2>${escapeHtml(chart.input.name || t("unnamed"))} · ${escapeHtml(activeLang === "hi" ? chart.input.city.hi : chart.input.city.en)}</h2>
+        <p class="muted">
+          ${t("summaryCurrent")}: <strong>${vm.lifeAreas[0].title}</strong>.
+          ${t("summaryFuture")}: <strong>${vm.nextMaha ? vm.lifeAreas.slice().sort((a, b) => b.future - a.future)[0].title : vm.lifeAreas[0].title}</strong>.
+        </p>
+        <div class="stats">
+          <div class="stat"><div class="stat-label">${t("summaryCity")}</div><div class="stat-value">${escapeHtml(activeLang === "hi" ? chart.input.city.hi : chart.input.city.en)}</div></div>
+          <div class="stat"><div class="stat-label">${t("lagna")}</div><div class="stat-value">${localizeRashi(chart.lagnaName)}</div></div>
+          <div class="stat"><div class="stat-label">${t("currentMaha")}</div><div class="stat-value">${localizePlanet(chart.dasha.current.lord)}</div></div>
+          <div class="stat"><div class="stat-label">${t("currentAntar")}</div><div class="stat-value">${localizePlanet(chart.dasha.currentAntar.lord)}</div></div>
+          <div class="stat"><div class="stat-label">${t("nextMaha")}</div><div class="stat-value">${vm.nextMaha ? localizePlanet(vm.nextMaha.lord) : "-"}</div></div>
+          <div class="stat"><div class="stat-label">${t("nakshatra")}</div><div class="stat-value">${localizeNakshatra(chart.panchang.nakshatra.name)}</div></div>
+        </div>
+        <div class="badge-row">
+          ${topThree.map((area) => `<span class="badge">${escapeHtml(area.title)} · ${area.present}</span>`).join("")}
+        </div>
+        <div class="callout ${validation.ok ? "" : "warn"}" style="margin-top:14px;">
+          <strong>${t("validationTitle")}:</strong> ${validation.ok ? t("validationPass") : `${t("validationFail")} ${failedSections.join(", ")}`}
+        </div>
+        <div class="badge-row" style="margin-top:12px;">
+          ${validation.checks.map((item) => `<span class="badge">${escapeHtml(t(`nav.${item.key}`))}: ${item.valid ? t("pass") : t("fallbackWord")}</span>`).join("")}
+        </div>
+      `;
+    }
+
+    function renderLifeSection(chart, vm) {
+      qs("life").innerHTML = `
+        <section class="panel">
+          <h2>${t("lifeTitle")}</h2>
+          <div class="callout soft">${t("ritualSafety")}</div>
+          <div class="area-grid" style="margin-top:16px;">
+            ${vm.lifeAreas.map((area) => `
+              <article class="area-card">
+                <div class="area-head">
+                  <div>
+                    <h3>${escapeHtml(area.title)}</h3>
+                    <div class="muted" style="margin-top:6px;">${escapeHtml(area.remedyFocus)}</div>
+                  </div>
+                  <div class="score">${t("focusNow")}<br>${area.present}</div>
+                </div>
+                <div class="progress-wrap">
+                  <div class="progress-line">
+                    <div class="muted">${t("presentScore")} · ${scoreLabel(area.present)} · ${area.currentReference}</div>
+                    <div class="progress-track"><div class="progress-fill" style="width:${area.present}%;"></div></div>
+                  </div>
+                  <div class="progress-line">
+                    <div class="muted">${t("futureScore")} · ${scoreLabel(area.future)} · ${area.futureReference}</div>
+                    <div class="progress-track"><div class="progress-fill" style="width:${area.future}%; opacity:0.72;"></div></div>
+                  </div>
+                </div>
+                <div class="callout" style="margin-top:14px;">
+                  <strong>${t("predictedNow")}:</strong> ${escapeHtml(area.presentText)}
+                </div>
+                <div class="callout soft" style="margin-top:12px;">
+                  <strong>${t("predictedFuture")}:</strong> ${escapeHtml(area.futureText)}
+                </div>
+                <div class="callout warn" style="margin-top:12px;">
+                  <strong>${t("specificRemedy")}:</strong> ${escapeHtml(area.ritual.title)}.
+                  ${escapeHtml(area.ritual.deity)} · ${escapeHtml(area.ritual.yantra)}
+                </div>
+                <ul class="remedy-list">
+                  ${area.practical.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+                </ul>
+              </article>
+            `).join("")}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderHouseSection(vm) {
+      qs("houses").innerHTML = `
+        <section class="panel">
+          <h2>${t("housesTitle")}</h2>
+          <div class="house-grid">
+            ${vm.houses.map((house) => {
+              const areaKey = getAreaKeyForHouse(house.house);
+              return `
+                <article class="house-card">
+                  <h3>${t("houseWord")} ${house.house} · ${localizeRashi(house.rashiName)}</h3>
+                  <div class="muted">${localizeHouseSign(house.house - 1)}</div>
+                  <div class="house-meta">
+                    <span class="chip">${t("houseStrength")} ${house.occupantStrength}</span>
+                    <span class="chip blue">${t("presentScore")} ${house.present}</span>
+                    <span class="chip blue">${t("futureScore")} ${house.future}</span>
+                  </div>
+                  <div class="muted" style="margin-top:12px;"><strong>${t("occupants")}:</strong> ${house.occupants.length ? house.occupants.map((planet) => `${localizePlanet(planet.key)} (${localizeState(planet.state)})`).join(", ") : "-"}</div>
+                  <div class="muted" style="margin-top:8px;"><strong>${t("linkedArea")}:</strong> ${AREA_LIBRARY[areaKey][activeLang].title}</div>
+                  <div class="muted" style="margin-top:8px;"><strong>${t("remedyFocus")}:</strong> ${AREA_LIBRARY[areaKey].ritual[activeLang].title}</div>
+                </article>
+              `;
+            }).join("")}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderPlanetSection(vm) {
+      qs("planets").innerHTML = `
+        <section class="panel">
+          <h2>${t("planetsTitle")}</h2>
+          <div class="planet-grid">
+            ${vm.planets.map((planet) => `
+              <article class="planet-card">
+                <div class="planet-head">
+                  <div style="display:flex; gap:10px;">
+                    <span class="planet-symbol" style="background:${planet.color};">${planet.short}</span>
+                    <div>
+                      <h3>${localizePlanet(planet.key)}</h3>
+                      <div class="muted">${localizeRashi(planet.rashiName)} · ${t("houseWord")} ${planet.house}</div>
+                    </div>
+                  </div>
+                  <div class="score">${t("planetStrength")}<br>${planet.strength}</div>
+                </div>
+                <div class="house-meta">
+                  <span class="chip">${localizeState(planet.state)}</span>
+                  <span class="chip blue">${activationLabel(planet.nowScore, planet.futureScore)}</span>
+                  <span class="chip blue">${t("focusArea")} · ${escapeHtml(planet.focusAreaTitle)}</span>
+                </div>
+                <div class="progress-wrap">
+                  <div class="progress-line">
+                    <div class="muted">${t("focusNow")} · ${planet.nowScore}</div>
+                    <div class="progress-track"><div class="progress-fill" style="width:${planet.nowScore}%;"></div></div>
+                  </div>
+                  <div class="progress-line">
+                    <div class="muted">${t("focusFuture")} · ${planet.futureScore}</div>
+                    <div class="progress-track"><div class="progress-fill" style="width:${planet.futureScore}%; opacity:0.72;"></div></div>
+                  </div>
+                </div>
+                <div class="muted" style="margin-top:12px;"><strong>${t("aspects")}:</strong> ${planet.aspects.join(", ")}</div>
+                <div class="callout" style="margin-top:12px;">
+                  <strong>${t("remedy")}:</strong> ${escapeHtml(planet.remedy.mantra)}
+                </div>
+                <ul class="remedy-list">
+                  <li>${t("jaap")}: ${planet.remedy.count.toLocaleString()}</li>
+                  ${planet.remedy.jainAdaptation.slice(0, 2).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+                </ul>
+              </article>
+            `).join("")}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderTimingSection(chart, vm) {
+      const p = chart.panchang;
+      qs("timing").innerHTML = `
+        <section class="section-grid">
+          <article class="panel">
+            <h2>${t("timingTitle")}</h2>
+            <div class="stats">
+              <div class="stat"><div class="stat-label">${t("tithi")}</div><div class="stat-value">${localizeWeekday(p.weekday)} · ${localizeTithi(p.tithi)}</div></div>
+              <div class="stat"><div class="stat-label">${t("nakshatra")}</div><div class="stat-value">${localizeNakshatra(p.nakshatra.name)} ${t("padaWord")} ${p.nakshatra.pada}</div></div>
+              <div class="stat"><div class="stat-label">${t("yoga")}</div><div class="stat-value">${localizeYoga(p.yoga.name)}</div></div>
+              <div class="stat"><div class="stat-label">${t("karana")}</div><div class="stat-value">${localizeKarana(p.karana.name)}</div></div>
+            </div>
+            <div class="callout" style="margin-top:14px;">
+              ${t("birthBalance")}: <strong>${chart.dasha.birthBalanceYears}</strong> ${t("yearsWord")} <strong>${localizePlanet(chart.dasha.birthNak.lord)}</strong>.
+            </div>
+          </article>
+
+          <article class="panel">
+            <h2>${t("timeline")}</h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>${t("currentPeriod")}</th>
+                    <th>${t("strength")}</th>
+                    <th>${t("focusArea")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>${localizePlanet(chart.dasha.current.lord)}</td>
+                    <td>${vm.planets.find((planet) => planet.key === chart.dasha.current.lord)?.strength || "-"}</td>
+                    <td>${vm.planets.find((planet) => planet.key === chart.dasha.current.lord)?.focusAreaTitle || "-"}</td>
+                  </tr>
+                  <tr>
+                    <td>${localizePlanet(chart.dasha.currentAntar.lord)}</td>
+                    <td>${vm.planets.find((planet) => planet.key === chart.dasha.currentAntar.lord)?.strength || "-"}</td>
+                    <td>${vm.planets.find((planet) => planet.key === chart.dasha.currentAntar.lord)?.focusAreaTitle || "-"}</td>
+                  </tr>
+                  <tr>
+                    <td>${vm.nextMaha ? localizePlanet(vm.nextMaha.lord) : "-"}</td>
+                    <td>${vm.nextMaha ? (vm.planets.find((planet) => planet.key === vm.nextMaha.lord)?.strength || "-") : "-"}</td>
+                    <td>${vm.nextMaha ? (vm.planets.find((planet) => planet.key === vm.nextMaha.lord)?.focusAreaTitle || "-") : "-"}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="panel wide">
+            <h2>${t("timeline")}</h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>${t("currentMaha")}</th>
+                    <th>${t("focusNow")}</th>
+                    <th>${t("focusFuture")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${chart.dasha.dashas.map((item) => {
+                    const planet = vm.planets.find((p0) => p0.key === item.lord);
+                    return `
+                      <tr>
+                        <td>${localizePlanet(item.lord)} · ${formatDateLocalized(item.start)} → ${formatDateLocalized(item.end)}</td>
+                        <td>${planet ? planet.focusAreaTitle : "-"}</td>
+                        <td>${planet ? activationLabel(planet.nowScore, planet.futureScore) : "-"}</td>
+                      </tr>
+                    `;
+                  }).join("")}
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+      `;
+    }
+
+    function renderRitualSection(vm) {
+      const rituals = vm.lifeAreas.slice(0, 4).map((area) => area.ritual);
+      qs("rituals").innerHTML = `
+        <section class="panel">
+          <h2>${t("ritualTitle")}</h2>
+          <div class="callout warn">${t("noteRitual")}</div>
+          <div class="ritual-grid" style="margin-top:16px;">
+            ${rituals.map((ritual) => `
+              <article class="ritual-card">
+                <h3>${escapeHtml(ritual.title)}</h3>
+                <div class="muted" style="margin-top:8px;">${escapeHtml(ritual.deity)}</div>
+                <div class="badge-row">
+                  <span class="badge">${escapeHtml(ritual.yantra)}</span>
+                  <span class="badge">${escapeHtml(ritual.source)}</span>
+                </div>
+                <div class="callout" style="margin-top:12px;">
+                  <strong>${t("mantra")}:</strong> ${escapeHtml(ritual.mantra)}
+                </div>
+                <div class="muted" style="margin-top:12px;"><strong>${t("ritualWhen")}:</strong> ${escapeHtml(ritual.when)}</div>
+                <div class="muted" style="margin-top:8px;"><strong>${t("ritualLogic")}:</strong> ${escapeHtml(ritual.logic)}</div>
+                <ul class="remedy-list">
+                  ${ritual.process.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}
+                </ul>
+              </article>
+            `).join("")}
+          </div>
+          <div class="ritual-grid" style="margin-top:16px;">
+            ${DEEP_RITUALS[activeLang].map((ritual) => `
+              <article class="ritual-card">
+                <h3>${escapeHtml(ritual.title)}</h3>
+                <div class="muted" style="margin-top:8px;">${escapeHtml(ritual.purpose)}</div>
+                <div class="callout soft" style="margin-top:12px;"><strong>${t("ritualWhen")}:</strong> ${escapeHtml(ritual.when)}</div>
+                <ul class="remedy-list">
+                  ${ritual.steps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}
+                </ul>
+              </article>
+            `).join("")}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderMuhurtaSection(chart) {
+      const muhurta = JAIN.astro.evaluateMuhurta(new Date(`${chart.input.date}T${chart.input.time}`), chart.input.latitude, chart.input.longitude);
+      const sunRashi = Math.floor(chart.panchang.sidereal.Sun / 30);
+      const marriageFlags = [];
+      if (sunRashi === 8 || sunRashi === 11) {
+        marriageFlags.push(t("kharmasWarning"));
+      }
+      if (muhurta.forbidden.length) {
+        marriageFlags.push(`${t("forbiddenTithiClass")}: ${muhurta.forbidden.map(localizeForbiddenTag).join(", ")}.`);
+      }
+      qs("muhurta").innerHTML = `
+        <section class="section-grid">
+          <article class="panel">
+            <h2>${t("muhurtaTitle")}</h2>
+            <div class="stats">
+              <div class="stat"><div class="stat-label">${t("hora")}</div><div class="stat-value">${localizePlanet(muhurta.activeHora.lord)}</div></div>
+              <div class="stat"><div class="stat-label">${t("auspicious")}</div><div class="stat-value">${muhurta.activeHora.auspicious ? t("beneficHora") : t("avoidHora")}</div></div>
+              <div class="stat"><div class="stat-label">${t("businessCheck")}</div><div class="stat-value">${muhurta.businessOkay ? t("pass") : t("check")}</div></div>
+              <div class="stat"><div class="stat-label">${t("forbiddenTags")}</div><div class="stat-value">${muhurta.forbidden.length ? muhurta.forbidden.map(localizeForbiddenTag).join(", ") : t("none")}</div></div>
+            </div>
+          </article>
+
+          <article class="panel">
+            <h2>${t("marriageFlags")}</h2>
+            ${marriageFlags.length
+              ? `<div class="callout warn">${marriageFlags.map((item) => `<div>${escapeHtml(item)}</div>`).join("")}</div>`
+              : `<div class="callout">${t("noMarriageFlags")}</div>`}
+          </article>
+
+          <article class="panel wide">
+            <h2>${t("hora")}</h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>${t("hora")}</th>
+                    <th>${t("start")}</th>
+                    <th>${t("end")}</th>
+                    <th>${t("auspicious")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${muhurta.horas.map((hora) => `
+                    <tr>
+                      <td>${hora.index}</td>
+                      <td>${localizePlanet(hora.lord)}</td>
+                      <td>${formatTimeLocalized(hora.start)}</td>
+                      <td>${formatTimeLocalized(hora.end)}</td>
+                      <td>${hora.auspicious ? t("beneficHora") : t("avoidHora")}</td>
+                    </tr>
+                  `).join("")}
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+      `;
+    }
+
+    function polarPoint(radius, angleDeg, scale, cx, cy) {
+      const angle = (angleDeg - 90) * Math.PI / 180;
+      return {
+        x: cx + Math.cos(angle) * radius * scale,
+        y: cy + Math.sin(angle) * radius * scale
+      };
+    }
+
+    function renderCosmologySection(chart) {
+      const snap = chart.cosmology;
+      const maxRadius = Math.max(snap.visibleSun.radius, snap.visibleMoon.radius);
+      const scale = 150 / maxRadius;
+      const center = { x: 250, y: 200 };
+      const vs = polarPoint(snap.visibleSun.radius, snap.visibleSun.angle, scale, center.x, center.y);
+      const vm = polarPoint(snap.visibleMoon.radius, snap.visibleMoon.angle, scale, center.x, center.y);
+      const as = polarPoint(snap.antipodalSun.radius, snap.antipodalSun.angle, scale, center.x, center.y);
+      const am = polarPoint(snap.antipodalMoon.radius, snap.antipodalMoon.angle, scale, center.x, center.y);
+
+      qs("cosmology").innerHTML = `
+        <section class="section-grid">
+          <article class="panel">
+            <h2>${t("cosmologyTitle")}</h2>
+            <p class="muted">${t("cosmologyText")}</p>
+            <div class="badge-row">
+              <span class="badge">${t("sunAngle")} ${snap.visibleSun.angle}°</span>
+              <span class="badge">${t("moonAngle")} ${snap.visibleMoon.angle}°</span>
+              <span class="badge">${t("antipodalAngle")}</span>
+            </div>
+          </article>
+
+          <article class="panel">
+            <h2>${t("orbitNotes")}</h2>
+            <div class="table-wrap">
+              <table>
+                <tbody>
+                  ${COSMOLOGY_NOTES[activeLang].map((item) => `<tr><th>${escapeHtml(item.label)}</th><td>${escapeHtml(item.value)}</td></tr>`).join("")}
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="panel wide">
+            <div class="cosmo">
+              <svg viewBox="0 0 500 400" width="100%" height="100%">
+                <circle cx="250" cy="200" r="150" fill="none" stroke="rgba(121,54,15,0.15)" stroke-width="1.5"></circle>
+                <circle cx="250" cy="200" r="130" fill="none" stroke="rgba(121,54,15,0.12)" stroke-width="1.5"></circle>
+                <circle cx="250" cy="200" r="25" fill="#f2c16d" stroke="#b65a1f" stroke-width="2"></circle>
+                <text x="250" y="205" text-anchor="middle" fill="#7a3813" font-size="15" font-weight="700">${t("meru")}</text>
+                <circle cx="${vs.x}" cy="${vs.y}" r="11" fill="#c66112"></circle>
+                <circle cx="${vm.x}" cy="${vm.y}" r="10" fill="#2f71c1"></circle>
+                <circle cx="${as.x}" cy="${as.y}" r="11" fill="rgba(198,97,18,0.35)"></circle>
+                <circle cx="${am.x}" cy="${am.y}" r="10" fill="rgba(47,113,193,0.35)"></circle>
+                <text x="${vs.x + 14}" y="${vs.y - 8}" fill="#7a3813" font-size="13">${t("visibleSun")}</text>
+                <text x="${vm.x + 14}" y="${vm.y - 8}" fill="#25446d" font-size="13">${t("visibleMoon")}</text>
+                <text x="${as.x + 14}" y="${as.y - 8}" fill="#9a6a44" font-size="12">${t("antipodalSun")}</text>
+                <text x="${am.x + 14}" y="${am.y - 8}" fill="#5b80ac" font-size="12">${t("antipodalMoon")}</text>
+              </svg>
+            </div>
+          </article>
+        </section>
+      `;
+    }
+
+    function renderNotesSection(chart) {
+      qs("notes").innerHTML = `
+        <section class="section-grid">
+          <article class="panel">
+            <h2>${t("notesTitle")}</h2>
+            <ul class="subtle-list">
+              ${SOURCE_NOTES[activeLang].map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+            </ul>
+          </article>
+
+          <article class="panel">
+            <h2>${t("keyConstants")}</h2>
+            <div class="table-wrap">
+              <table>
+                <tbody>
+                  <tr><th>${t("yugaWord")}</th><td>${JAIN.data.YUGA_DATA.solarYears} ${t("solarYearsWord")}</td></tr>
+                  <tr><th>${t("lunarMonthsWord")}</th><td>${JAIN.data.YUGA_DATA.lunarMonths}</td></tr>
+                  <tr><th>${t("adhikMaasWord")}</th><td>${JAIN.data.YUGA_DATA.adhikMaas}</td></tr>
+                  <tr><th>${t("ruleWord")}</th><td>${escapeHtml(YUGA_RULES[activeLang])}</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="panel wide">
+            <h2>${t("nakRegistry")}</h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>${t("orderWord")}</th>
+                    <th>${t("nameWord")}</th>
+                    <th>${t("tierWord")}</th>
+                    <th>${t("noteWord")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${JAIN.utils.getJainNakshatraNotes().map((nak) => `
+                    <tr>
+                      <td>${nak.order}</td>
+                      <td>${localizeNakshatra(nak.name)}</td>
+                      <td>${localizeTier(nak.tier)}</td>
+                      <td>${escapeHtml(localizeNakshatraNote(nak.note || "-"))}</td>
+                    </tr>
+                  `).join("")}
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+      `;
+    }
+
+    function renderAll() {
+      updateStaticText();
+      renderNav();
+      if (!currentChart) {
+        showSection(activeSection);
+        return;
+      }
+      const vm = buildChartViewModel(currentChart);
+      safeRenderSection("life", () => renderLifeSection(currentChart, vm));
+      safeRenderSection("houses", () => renderHouseSection(vm));
+      safeRenderSection("planets", () => renderPlanetSection(vm));
+      safeRenderSection("timing", () => renderTimingSection(currentChart, vm));
+      safeRenderSection("rituals", () => renderRitualSection(vm));
+      safeRenderSection("muhurta", () => renderMuhurtaSection(currentChart));
+      safeRenderSection("cosmology", () => renderCosmologySection(currentChart));
+      safeRenderSection("notes", () => renderNotesSection(currentChart));
+      renderSummary(currentChart, vm);
+      showSection(activeSection);
+    }
+
+    function generate() {
+      const input = getInput();
+      if (!input || !input.date || !input.time) {
+        alert(t("unresolvedCity"));
+        return;
+      }
+      currentChart = JAIN.astro.buildChart(input);
+      renderAll();
+    }
+
+    function buildPrintableHtml(lang) {
+      const previousLang = activeLang;
+      activeLang = lang;
+      renderAll();
+      const title = lang === "hi" ? "जैन कुण्डली" : "Jain Kundali";
+      const summary = qs("summaryPanel").innerHTML;
+      const sectionsHtml = sections.map((section) => `
+        <section class="print-section">
+          <h2>${escapeHtml(t(`nav.${section.key}`))}</h2>
+          ${qs(section.id).innerHTML}
+        </section>
+      `).join("");
+      const html = `
+        <!DOCTYPE html>
+        <html lang="${lang}">
+        <head>
+          <meta charset="UTF-8">
+          <title>${title}</title>
+          <style>
+            body { font-family: Georgia, "Times New Roman", serif; margin: 0; color: #2f2419; background: #fff; }
+            main { max-width: 980px; margin: 0 auto; padding: 28px 24px 40px; }
+            h1, h2, h3 { margin: 0; }
+            h1 { font-size: 34px; margin-bottom: 10px; }
+            h2 { font-size: 24px; margin-bottom: 14px; color: #7a3813; }
+            p, li, td, th, div { line-height: 1.55; }
+            .panel, .area-card, .house-card, .planet-card, .ritual-card, .callout, .stat { border: 1px solid #dccab2; border-radius: 14px; padding: 12px; margin-bottom: 12px; background: #fffaf2; }
+            .stats, .area-grid, .planet-grid, .ritual-grid, .section-grid, .house-grid { display: block; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            th, td { border-bottom: 1px solid #e5d7c5; padding: 8px; text-align: left; vertical-align: top; }
+            .badge, .chip { display: inline-block; border: 1px solid #dccab2; border-radius: 999px; padding: 4px 8px; margin: 0 6px 6px 0; }
+            .progress-track { height: 8px; background: #eedcc7; border-radius: 999px; overflow: hidden; margin-top: 6px; }
+            .progress-fill { height: 100%; background: #b65a1f; }
+            .print-section { page-break-inside: avoid; margin-top: 24px; }
+          </style>
+        </head>
+        <body>
+          <main>
+            <h1>${title}</h1>
+            <section class="print-section">${summary}</section>
+            ${sectionsHtml}
+          </main>
+        </body>
+        </html>
+      `;
+      activeLang = previousLang;
+      renderAll();
+      return html;
+    }
+
+    function exportPdf(lang) {
+      if (!currentChart) {
+        alert(t("exportNeedsChart"));
+        return;
+      }
+      alert(t("exportPreparing"));
+      const printWindow = window.open("", "_blank");
+      if (!printWindow) return;
+      printWindow.document.open();
+      printWindow.document.write(buildPrintableHtml(lang));
+      printWindow.document.close();
+      setTimeout(() => {
+        printWindow.focus();
+        printWindow.print();
+      }, 500);
+    }
+
+    qs("langEn").addEventListener("click", () => {
+      activeLang = "en";
+      renderAll();
+    });
+
+    qs("langHi").addEventListener("click", () => {
+      activeLang = "hi";
+      renderAll();
+    });
+
+    qs("generateBtn").addEventListener("click", generate);
+    qs("pdfEnBtn").addEventListener("click", () => exportPdf("en"));
+    qs("pdfHiBtn").addEventListener("click", () => exportPdf("hi"));
+
+    populateCities();
+    renderAll();
+    generate();
+  </script>
+</body>
+</html>
