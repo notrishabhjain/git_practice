@@ -311,18 +311,19 @@
 
   function moonLongitude(jd) {
     const n = jd - 2451545.0;
-    const L0 = norm360(218.316 + 13.176396 * n);
-    const M = norm360(134.963 + 13.064993 * n) * Math.PI / 180;
-    const F = norm360(93.272 + 13.22935 * n) * Math.PI / 180;
-    const Msun = norm360(357.528 + 0.9856 * n) * Math.PI / 180;
+    const L0   = norm360(218.316 + 13.176396  * n);
+    const M    = norm360(134.963 + 13.064993  * n) * Math.PI / 180; // Moon anomaly M'
+    const D    = norm360(297.850 + 12.190749  * n) * Math.PI / 180; // Mean elongation D
+    const F    = norm360(93.272  + 13.229005  * n) * Math.PI / 180; // Arg of latitude F
+    const Msun = norm360(357.528 +  0.985600  * n) * Math.PI / 180; // Sun anomaly
     return norm360(
-      L0 +
-        6.289 * Math.sin(M) -
-        1.274 * Math.sin(2 * F - M) +
-        0.658 * Math.sin(2 * F) -
-        0.214 * Math.sin(2 * M) -
-        0.186 * Math.sin(Msun) -
-        0.114 * Math.sin(2 * F)
+      L0
+      + 6.289 * Math.sin(M)
+      - 1.274 * Math.sin(2 * D - M)  // evection (uses D, not F)
+      + 0.658 * Math.sin(2 * D)       // variation (uses D, not F)
+      - 0.214 * Math.sin(2 * M)
+      - 0.186 * Math.sin(Msun)
+      - 0.114 * Math.sin(2 * F)       // reduction to ecliptic (correctly uses F)
     );
   }
 
@@ -353,15 +354,18 @@
     const T = (jd - 2451545.0) / 36525.0;
     let gmst = 280.46061837 + 360.98564736629 * (jd - 2451545.0) + T * T * 0.000387933 - T * T * T / 38710000.0;
     gmst = norm360(gmst);
-    const lst = norm360(gmst + longitude);
-    const eps = (23.439291111 - 0.013004167 * T) * Math.PI / 180;
+    const lst    = norm360(gmst + longitude);
+    const eps    = (23.439291111 - 0.013004167 * T) * Math.PI / 180;
     const latRad = latitude * Math.PI / 180;
     const lstRad = lst * Math.PI / 180;
-    const tanAsc = -Math.cos(lstRad) / (Math.sin(eps) * Math.tan(latRad) + Math.cos(eps) * Math.sin(lstRad));
-    let asc = Math.atan(tanAsc) * 180 / Math.PI;
-    if (Math.cos(lstRad) > 0) {
-      asc += 180;
-    }
+    // atan2 gives correct quadrant; hour-angle disambiguates Asc vs Desc
+    const Y = -Math.cos(lstRad);
+    const X = Math.sin(eps) * Math.tan(latRad) + Math.cos(eps) * Math.sin(lstRad);
+    let asc = norm360(Math.atan2(Y, X) * 180 / Math.PI);
+    const ascRad = asc * Math.PI / 180;
+    const RA = norm360(Math.atan2(Math.sin(ascRad) * Math.cos(eps), Math.cos(ascRad)) * 180 / Math.PI);
+    const HA = norm360(lst - RA);
+    if (HA < 180) asc = norm360(asc + 180); // HA in (0,180) → Descendant side → flip
     return norm360(asc - ayanamsha);
   }
 
@@ -429,6 +433,8 @@
   }
 
   function getUtcOffsetHours(longitude) {
+    // Indian subcontinent uses IST (UTC+5:30) regardless of local meridian
+    if (longitude >= 68 && longitude <= 98) return 5.5;
     return Math.round(longitude / 15 * 2) / 2;
   }
 
@@ -671,10 +677,14 @@
   }
 
   function buildChart(input) {
-    const date = new Date(`${input.date}T${input.time}`);
+    // Parse date/time directly to avoid browser-timezone-dependent Date parsing
+    const [yr, mo, dy] = input.date.split('-').map(Number);
+    const [hh, mm]     = input.time.split(':').map(Number);
+    const decimalHours = hh + mm / 60;
     const utcOffset = getUtcOffsetHours(input.longitude);
-    const decimalHours = date.getHours() + date.getMinutes() / 60;
-    const jd = julianDay(date.getFullYear(), date.getMonth() + 1, date.getDate(), decimalHours - utcOffset);
+    const jd = julianDay(yr, mo, dy, decimalHours - utcOffset);
+    // Reconstruct a local-time Date (used only for panchang/dasha day calculations)
+    const date = new Date(yr, mo - 1, dy, hh, mm, 0, 0);
     const ayanamsha = lahiriAyanamsha(jd);
     const tropical = planetLongitudes(jd);
     const sidereal = siderealize(tropical, ayanamsha);
